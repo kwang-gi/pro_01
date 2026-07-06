@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>만남(소개팅) 프로젝트 — 설명서 v4</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root {
+    --text: #1f2430;
+    --text-sub: #5a6270;
+    --bg: #ffffff;
+    --bg-side: #f7f8fa;
+    --border: #e4e7ec;
+    --accent: #2f6fed;
+    --accent-bg: #eaf1fe;
+    --warn: #c0392b;
+    --warn-bg: #fdecea;
+    --ok-bg: #eefaf0;
+    --ok: #1e8a4c;
+    --table-stripe: #f6f8fb;
+    --table-head: #eef1f6;
+    --new: #8e44ad;
+    --new-bg: #f5eefc;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    font-size: 15.5px;
+    line-height: 1.7;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    width: 300px;
+    flex-shrink: 0;
+    background: var(--bg-side);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 20px 14px;
+  }
+  .sidebar h1 {
+    font-size: 16px;
+    margin: 0 0 4px 0;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .sidebar .meta {
+    font-size: 12px;
+    color: var(--text-sub);
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-cat { margin-bottom: 4px; }
+  .nav-cat-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+    user-select: none;
+  }
+  .nav-cat-toggle:hover { background: var(--accent-bg); }
+  .nav-cat-toggle .arrow {
+    display: inline-block;
+    transition: transform 0.15s ease;
+    font-size: 11px;
+    color: var(--text-sub);
+    width: 12px;
+  }
+  .nav-cat.open > .nav-cat-toggle .arrow { transform: rotate(90deg); }
+  .nav-sub {
+    list-style: none;
+    margin: 2px 0 8px 0;
+    padding: 0 0 0 22px;
+    display: none;
+  }
+  .nav-cat.open > .nav-sub { display: block; }
+  .nav-sub li { margin: 0; }
+  .nav-sub a {
+    display: block;
+    padding: 6px 10px;
+    font-size: 13px;
+    color: var(--text-sub);
+    border-radius: 6px;
+    line-height: 1.4;
+  }
+  .nav-sub a:hover, .nav-sub a.active {
+    background: var(--accent-bg);
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .nav-cat.new-cat .nav-cat-toggle { color: var(--new); background: var(--new-bg); }
+  .nav-cat.new-cat .nav-cat-toggle .arrow { color: var(--new); }
+  .sidebar-footer {
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 11.5px;
+    color: var(--text-sub);
+  }
+
+  /* ---------- Main content ---------- */
+  .main {
+    flex: 1;
+    min-width: 0;
+    padding: 36px 48px 80px 48px;
+    max-width: 1080px;
+  }
+  .page-header {
+    margin-bottom: 6px;
+  }
+  .page-header h1 {
+    font-size: 26px;
+    margin: 0 0 6px 0;
+  }
+  .page-header .sub {
+    color: var(--text-sub);
+    font-size: 13.5px;
+    margin-bottom: 28px;
+  }
+  section.cat {
+    margin-top: 44px;
+    padding-top: 8px;
+  }
+  section.cat:first-of-type { margin-top: 8px; }
+  section.cat > h2 {
+    font-size: 21px;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 10px;
+    margin-bottom: 18px;
+    scroll-margin-top: 20px;
+  }
+  section.cat.new-section > h2 {
+    border-bottom: 2px solid var(--new);
+  }
+  article.sub {
+    margin-bottom: 30px;
+    scroll-margin-top: 20px;
+  }
+  article.sub h3 {
+    font-size: 17.5px;
+    margin: 0 0 10px 0;
+    color: var(--text);
+  }
+  article.sub h4 {
+    font-size: 15px;
+    margin: 16px 0 6px 0;
+    color: var(--text);
+  }
+  .source-note {
+    font-size: 12.5px;
+    color: var(--text-sub);
+    background: var(--bg-side);
+    border-left: 3px solid var(--border);
+    padding: 6px 12px;
+    margin-bottom: 14px;
+  }
+  p { margin: 8px 0; }
+  ul, ol { padding-left: 22px; margin: 8px 0; }
+  li { margin: 4px 0; }
+  strong { color: var(--text); }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 14px 0 20px 0;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--table-head);
+    text-align: left;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+  }
+  tbody td {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody tr:nth-child(even) { background: var(--table-stripe); }
+  .table-scroll { overflow-x: auto; margin: 14px 0 20px 0; }
+  .table-scroll table { margin: 0; }
+
+  .badge {
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .badge-ok { background: var(--ok-bg); color: var(--ok); }
+  .badge-warn { background: var(--warn-bg); color: var(--warn); }
+  .badge-accent { background: var(--accent-bg); color: var(--accent); }
+  .badge-new { background: var(--new-bg); color: var(--new); }
+
+  .swatch {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    vertical-align: -3px;
+    margin-right: 6px;
+  }
+
+  .summary-box {
+    background: var(--accent-bg);
+    border: 1px solid #cfe0fb;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 10px;
+  }
+  .summary-box ol { margin: 6px 0 0 0; }
+  .summary-box li { margin: 8px 0; }
+
+  .todo-box {
+    background: var(--warn-bg);
+    border: 1px solid #f3cfc9;
+    border-radius: 10px;
+    padding: 16px 22px;
+    margin-top: 18px;
+  }
+  .todo-box h4 { margin: 0 0 8px 0; color: var(--warn); font-size: 14.5px; }
+
+  .confirm-box {
+    background: var(--ok-bg);
+    border: 1px solid #bfe8cc;
+    border-radius: 10px;
+    padding: 16px 22px;
+    margin: 14px 0 20px 0;
+  }
+  .confirm-box h4 { margin: 0 0 8px 0; color: var(--ok); font-size: 14.5px; }
+
+  blockquote {
+    margin: 10px 0;
+    padding: 8px 14px;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-bg);
+    color: var(--text-sub);
+    font-size: 14px;
+  }
+
+  code {
+    background: var(--table-head);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 13.5px;
+    font-family: Consolas, "D2Coding", monospace;
+  }
+
+  pre {
+    background: var(--bg-side);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+    font-family: Consolas, "D2Coding", monospace;
+    color: var(--text);
+  }
+  pre code { background: none; padding: 0; }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; position: relative; }
+    .main { padding: 24px; max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ================= SIDEBAR ================= -->
+  <nav class="sidebar">
+    <h1>만남(소개팅) 프로젝트<br>설명서 v4</h1>
+    <div class="meta">v4 · 2026-07-06 13:53 갱신<br>(이름 변경: 자료정리→설명서 · v3: 12:52, v2: 12:40, v1: 오전)</div>
+
+    <div class="nav-cat open new-cat">
+      <div class="nav-cat-toggle" onclick="toggleCat(this)"><span class="arrow">▶</span>🆕 PRD·아키텍처 (v3)</div>
+      <ul class="nav-sub">
+        <li><a href="#prd-overview" class="navlink">한눈에 보기</a></li>
+        <li><a href="#prd-confirm" class="navlink">0706 확정 답변 4건</a></li>
+        <li><a href="#prd-scope" class="navlink">목표와 범위</a></li>
+        <li><a href="#prd-principle" class="navlink">설계 원칙</a></li>
+        <li><a href="#prd-arch" class="navlink">시스템 아키텍처</a></li>
+        <li><a href="#prd-stack" class="navlink">기술 스택</a></li>
+        <li><a href="#prd-backend" class="navlink">백엔드(settings 설계)</a></li>
+        <li><a href="#prd-frontend" class="navlink">프런트(관리자 설정 탭)</a></li>
+        <li><a href="#prd-security" class="navlink">보안·방어</a></li>
+        <li><a href="#prd-payment" class="navlink">결제·정산</a></li>
+        <li><a href="#prd-admin-table" class="navlink">★관리자 옵션 총괄표</a></li>
+        <li><a href="#prd-deploy" class="navlink">배포 단계</a></li>
+        <li><a href="#prd-blank" class="navlink">공란(미결정) 목록</a></li>
+        <li><a href="#prd-roadmap" class="navlink">구현 로드맵</a></li>
+        <li><a href="#prd-audit" class="navlink">현재 코드 현황(실사)</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-cat open new-cat">
+      <div class="nav-cat-toggle" onclick="toggleCat(this)"><span class="arrow">▶</span>🆕 시장조사 (0706)</div>
+      <ul class="nav-sub">
+        <li><a href="#mr-1" class="navlink">오픈소스·라이브러리</a></li>
+        <li><a href="#mr-2" class="navlink">결제·연동 참고</a></li>
+        <li><a href="#mr-3" class="navlink">유사 서비스</a></li>
+        <li><a href="#mr-4" class="navlink">디자인 사례</a></li>
+        <li><a href="#mr-5" class="navlink">색상 팔레트 3세트</a></li>
+        <li><a href="#mr-6" class="navlink">UI 킷·접근성</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-cat open new-cat">
+      <div class="nav-cat-toggle" onclick="toggleCat(this)"><span class="arrow">▶</span>🆕 검증·외부자문 (0706)</div>
+      <ul class="nav-sub">
+        <li><a href="#ver-1" class="navlink">3중 검증 체계</a></li>
+        <li><a href="#ver-2" class="navlink">codex 1차 자문</a></li>
+        <li><a href="#ver-3" class="navlink">agy 2차 확증</a></li>
+        <li><a href="#ver-4" class="navlink">검증 체크리스트</a></li>
+        <li><a href="#ver-5" class="navlink">사장님 판단 대기</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-cat open">
+      <div class="nav-cat-toggle" onclick="toggleCat(this)"><span class="arrow">▶</span>⭐ 핵심 요약</div>
+      <ul class="nav-sub">
+        <li><a href="#sec-summary" class="navlink">전체 요약 (5분 컷)</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-cat open">
+      <div class="nav-cat-toggle" onclick="toggleCat(this)"><span class="arrow">▶</span>자료 인벤토리·중복 정리</div>
+      <ul class="nav-sub">
+        <li><a href="#inv-1" class="navlink">1. 원자료 목록</a></li>
+        <li><a href="#inv-2" class="navlink">2. mht 내부 구성</a></li>
+        <li><a href="#inv-3" class="navlink">3. GitHub repo 구성</a></li>
+        <li><a href="#inv-4" class="navlink">4. 중복 제거 판정</a></li>
+        <li><a href="#inv-5" class="navlink">5. 다운로드된 동영상</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-cat open">
+      <div class="nav-cat-toggle" onclick="toggleCat(this)"><span class="arrow">▶</span>Linker 사업 기획</div>
+      <ul class="nav-sub">
+        <li><a href="#biz-1" class="navlink">1. 서비스 컨셉</a></li>
+        <li><a href="#biz-2" class="navlink">2. 요금·정산 구조</a></li>
+        <li><a href="#biz-3" class="navlink">3. 성비 불균형 대응</a></li>
+        <li><a href="#biz-4" class="navlink">4. 신원 인증 (등기 PAV)</a></li>
+        <li><a href="#biz-5" class="navlink">5. 무관용 원칙</a></li>
+        <li><a href="#biz-6" class="navlink">6. 어뷰징 방어 로직</a></li>
+        <li><a href="#biz-7" class="navlink">7. 문화·에티켓 시스템</a></li>
+        <li><a href="#biz-8" class="navlink">8. 운영·마케팅 전략</a></li>
+        <li><a href="#biz-9" class="navlink">9. 미결/추후 논의</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-cat open">
+      <div class="nav-cat-toggle" onclick="toggleCat(this)"><span class="arrow">▶</span>시장조사·페인포인트</div>
+      <ul class="nav-sub">
+        <li><a href="#mkt-1" class="navlink">1. 데이팅 앱 페인포인트</a></li>
+        <li><a href="#mkt-2" class="navlink">2. 결혼정보회사 페인포인트</a></li>
+        <li><a href="#mkt-3" class="navlink">3. 프리미엄 서비스의 함정</a></li>
+        <li><a href="#mkt-4" class="navlink">4. 로맨스 스캠</a></li>
+        <li><a href="#mkt-5" class="navlink">5. 일본 바가지 술집 피해</a></li>
+        <li><a href="#mkt-6" class="navlink">6. 실사용자 목소리(레딧)</a></li>
+        <li><a href="#mkt-7" class="navlink">7. 소비자 핵심 니즈 4가지</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-cat open">
+      <div class="nav-cat-toggle" onclick="toggleCat(this)"><span class="arrow">▶</span>보안·아키텍처</div>
+      <ul class="nav-sub">
+        <li><a href="#sec-1" class="navlink">1. 설계 철학</a></li>
+        <li><a href="#sec-2" class="navlink">2. 핵심 아키텍처</a></li>
+        <li><a href="#sec-3" class="navlink">3. 설치형 클라이언트(Tauri)</a></li>
+        <li><a href="#sec-4" class="navlink">4. 데이터·통신 보안</a></li>
+        <li><a href="#sec-5" class="navlink">5. 정산·금융 보안</a></li>
+        <li><a href="#sec-6" class="navlink">6. 소스코드·DB 관리</a></li>
+        <li><a href="#sec-7" class="navlink">7. 기술 스택</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-cat open">
+      <div class="nav-cat-toggle" onclick="toggleCat(this)"><span class="arrow">▶</span>개발 참고자료</div>
+      <ul class="nav-sub">
+        <li><a href="#dev-1" class="navlink">1. 코드팩토리 튜토리얼</a></li>
+        <li><a href="#dev-2" class="navlink">2. lilys-pattern-skill</a></li>
+        <li><a href="#dev-3" class="navlink">3. 유튜브 분석 전문가 지침</a></li>
+        <li><a href="#dev-4" class="navlink">4. readme 웹앱 방향</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      v4 · 2026-07-06 13:53 갱신 (자료정리→설명서)<br>
+      (v3: 12:52, v2: 12:40, v1: 오전)<br>
+      원본 md 5개 + PRD v3·실사·시장조사·검증계획 통합
+    </div>
+  </nav>
+
+  <!-- ================= MAIN ================= -->
+  <main class="main">
+
+    <div class="page-header">
+      <h1>만남(소개팅) 프로젝트 — 설명서 v4</h1>
+      <div class="sub">v4 · 2026-07-06 13:53 갱신 — 이름 변경: 자료정리→설명서 (v3: 12:52, v2: 12:40, v1: 오전) &nbsp;|&nbsp; 원본: 자료정리 md 5개 + PRD v3 + 실사 + 시장조사 2건 + 검증계획 통합</div>
+    </div>
+
+    <!-- ============ 핵심 요약 ============ -->
+    <section class="cat" id="sec-summary">
+      <h2>⭐ 핵심 요약</h2>
+      <div class="summary-box">
+        <ol>
+          <li><strong>🆕 PRD v3(아키텍처판) 추가됨</strong> — 좌측 첫 메뉴 「PRD·아키텍처 (v3)」 참조. settings 기반 관리자 옵션 총괄 설계 + 현재 코드 실사 결과 포함.</li>
+          <li><strong>🆕 시장조사·검증계획 추가됨 (v3)</strong> — 오픈소스·결제연동·유사서비스(내친소)·디자인 팔레트 3세트 조사 + codex/agy 외부 자문 결과와 3중 검증 체계. 좌측 「시장조사 (0706)」·「검증·외부자문 (0706)」 메뉴 참조.</li>
+          <li><strong>프로젝트 정체</strong>: "Linker" — 지인 소개 기반 리워드 매칭 소개팅 웹 플랫폼 신사업 기획. 대표가 2026-04-13 Gemini와 나눈 기획 대화를 뼈대로, AI 3종(클로드 코드+Codex+Gemini)을 활용해 3일 내 직접 개발할 계획.</li>
+          <li><strong>자료 4종 구성</strong>: ① 원자료(OneNote mht 9.6만자 + 이미지7 + 유튜브 영상3), ② GitHub repo(Linker 문서 19개 + lilys 요약 스킬), ③ 이번에 정리한 자료정리 md 5개(인벤토리·사업기획·시장조사·보안·개발참고), ④ 다운로드 동영상 3편(일본 바가지 뉴스, 클로드코드 튜토리얼, 로맨스스캠 정리) + 한글자막.</li>
+          <li><strong>중복 정리 결론</strong>: repo 문서 19개 중 <strong>01(PRD)+02(페인포인트)+03(아키텍처)+05(보안가이드)+18(대표 지시사항 집대성)</strong> 5개만 정본. 00(채팅 압축본), 04·06~17(같은 내용 버전업 반복물 14개)은 표현만 다른 중복이라 분석 제외.</li>
+          <li><strong>기획 골자</strong>: 지인이 소개(리셀러)하면 성사 시 수수료(성사비 총 10 = 예치금+주선비+잔금 구조, 실제 70만~120만원 하이엔드 지향). 남초 시장 대응한 성별 소개 룰, 등기우편 본인인증(PAV), 폭력·포교·사업제안·돈얘기 4대 조항 무관용 몰수, 서버가 털려도 내용이 안 나오는 "은폐와 분리" 보안 아키텍처(빈 대문 서버+유령DB+Tauri 클라이언트 E2EE)가 핵심 차별점.</li>
+          <li><strong>다음 할 일</strong>: PRD v3에서 사장님 확정 답변 4건(보안 보류/결제 이원화/앱은 자리만/서비스명 관리자설정화)이 반영됨. 남은 미결 3건(여성우대 구체값·우수주선자 기준·예치금모드 전환규칙)은 「PRD·아키텍처(v3)」 섹션 하단 참고.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ 0. PRD·아키텍처 (v3) — 신규 ============ -->
+    <section class="cat new-section" id="cat-prd">
+      <h2>🆕 PRD·아키텍처 (v3)</h2>
+      <div class="source-note">원본: _작업/0706_PRD_MVP_v3.md (아키텍처 확장판, 최종본) + _작업/0706_linker-app_실사.md (코드 실사 발췌)</div>
+
+      <article class="sub" id="prd-overview">
+        <h3>한눈에 보기 (5줄 요약)</h3>
+        <ol>
+          <li><strong>무엇</strong>: 지인이 소개팅 상대를 추천(주선)하고 성사되면 수수료를 받는 웹 서비스. 결혼정보회사 아님 — 등기 인증 지인 소개 + 무관용 신고 시스템으로 안전한 만남만 딱 3번(또는 선택 횟수) 주선.</li>
+          <li><strong>누가 돈 냄</strong>: 신청자(소개받는 사람)가 주선비·성사비를 냄. 지인 본인은 돈 내는 걸 모름(수수료 비공개).</li>
+          <li><strong>돈이 어떻게 도나</strong>: 신청자 무통장 입금 신고 → 관리자가 눈으로 확인 → 잔고 반영 → 성사 시 주선자·플랫폼 분배.</li>
+          <li><strong>선택은 전부 관리자 옵션</strong>: 요금·비율·성사기준·예치금 방식 등 정책값은 전부 관리자 페이지 스위치로 켜고 끄며, 바꾸는 즉시 반영(재배포 불필요).</li>
+          <li><strong>지금 상태</strong>: <code>linker-app/</code>에 MVP 스캐폴드 완성(빌드 통과, 흐름 검증됨). 이번 v3는 그 위에 <strong>settings(설정) 테이블·관리자 옵션 확장·보안 로드맵·결제 로드맵</strong>을 얹는 설계도.</li>
+        </ol>
+      </article>
+
+      <article class="sub" id="prd-confirm">
+        <h3>★0706 사장님 확정 답변 (v3 단계 질문 4건)</h3>
+        <div class="confirm-box">
+          <h4>확정됨</h4>
+          <ol>
+            <li><strong>보안·방어</strong>: MVP 단계 구현 전부 보류 — 설계 자리(공란)만 두고, 외부 공개 전 일괄 착수</li>
+            <li><strong>결제</strong>: 무통장(수동 확인) 기본 + PG 블럭 자리 둘 다 — 관리자 페이지에서 전환</li>
+            <li><strong>앱</strong>: 웹 우선, 앱은 자리만 (다운로드·버전체크 구조만 설계)</li>
+            <li><strong>서비스 이름</strong>: 이름 자체를 관리자 설정값으로 (임시 표시 "만남", 언제든 변경)</li>
+          </ol>
+        </div>
+        <p class="source-note">v2(0706_PRD_MVP_v2.md)의 뼈대 + 10문 답변을 그대로 유지하며, 기술·아키텍처·백엔드·프런트·보안·결제를 구체화한 버전. v2 내용 삭제 없음 — 전부 이 문서 안에 재수록·확장. 미정 항목은 전부 「공란 — 추후 결정 (자리 확보됨)」로 통일 표기.</p>
+      </article>
+
+      <article class="sub" id="prd-scope">
+        <h3>목표와 범위</h3>
+        <h4>MVP에 넣는 것</h4>
+        <ul>
+          <li>회원가입(역할: 남성 신청자/여성 신청자/주선자/관리자) + 가입 인증(문자/등기 [모의])</li>
+          <li>지인 등록(성비 룰) + 지인 동의(알림톡 [모의])</li>
+          <li>소개 제안(주선자→신청자) — v3에서 <strong>요청형(신청자→주선자 게시판)</strong> 추가</li>
+          <li>만남 1~3회(또는 선택 횟수) 기록 → 성사 판정</li>
+          <li>무통장 입금 신고 → 관리자 확인 → 잔고 반영</li>
+          <li>성사비 원장, 주선자 정산</li>
+          <li>무관용 신고(4대 조항) → 몰수 + 자동 공지</li>
+          <li>관리자 콘솔(가입 승인·입금 확인·신고 처리·공지·정산)</li>
+          <li><span class="badge badge-new">v3 신규</span> 관리자 설정(settings) 탭 — 모든 정책값 실시간 변경</li>
+          <li><span class="badge badge-new">v3 신규</span> 버전 체크 API (로그인 시 업데이트 안내)</li>
+          <li><span class="badge badge-new">v3 신규</span> 개인정보 분리 저장 구조(자리 마련)</li>
+        </ul>
+        <h4>MVP에 안 넣는 것 (이후 단계)</h4>
+        <ul>
+          <li>실제 PG(토스 등) 연동, 실제 SMS/등기/알림톡 연동 — 전부 [모의] Provider 유지, 교체 지점만 마련</li>
+          <li>사진 업로드(텍스트 프로필만, 사진은 블럭 자리만)</li>
+          <li>Tauri 설치형 클라이언트(VIP용) — 서버가 커지면 도입</li>
+          <li>PostgreSQL 등 DB 이전 — 공란(추후 결정)</li>
+          <li>다중 서버·페일오버·유령 DB 등 고급 보안 인프라 — 공란(로드맵만 기재)</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="prd-principle">
+        <h3>최상위 설계 원칙</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>#</th><th>원칙</th><th>의미</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><strong>관리자 전체 제어·즉시 적용</strong></td><td>모든 정책(요금·비율·모드·기준)은 옵션으로 구현, 관리자 페이지에서 스위치 변경 시 재배포 없이 즉시 반영. 안 쓰는 옵션도 삭제 아닌 비활성 보존</td></tr>
+            <tr><td>2</td><td><strong>블럭(톱니바퀴) 교체형</strong></td><td>결제·문자·알림·사진 등 외부 연동은 전부 Provider 인터페이스 + Mock 구현체. 실서비스 연동 시 그 파일만 교체, 나머지 코드 무수정</td></tr>
+            <tr><td>3</td><td><strong>개인정보 분리</strong></td><td>신상 정보(이름·연락처·주소 등)는 매칭·정산 로직이 도는 메인 DB와 분리 보관 원칙. MVP는 같은 SQLite 파일 내 테이블 분리로 시작 → 이후 별도 DB로 물리 분리(공란)</td></tr>
+            <tr><td>4</td><td><strong>지인에게 수수료 숨김</strong></td><td>소개받는 지인(acquaintance)은 자신을 데려온 주선자가 수수료를 받는다는 사실을 화면 어디서도 볼 수 없음. 영업성 접근 최소화 목적</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </article>
+
+      <article class="sub" id="prd-arch">
+        <h3>시스템 아키텍처 (텍스트 구성도)</h3>
+        <pre>┌───────────────────────┐
+│ 클라이언트              │
+│ - 웹 브라우저(반응형)     │  ← MVP는 이것만
+│ - 설치형 앱(자리 — Tauri) │  ← 공란, VIP 단계에서 도입
+└───────────┬───────────┘
+            │ HTTPS
+            ▼
+┌───────────────────────────────────────┐
+│ Next.js 서버 (화면 + API 한 몸)          │
+│ - App Router 화면 렌더링                 │
+│ - Route Handler API (/api/**)           │
+│ - 세션 쿠키 인증 [모의 → 이후 강화]        │
+│ - ★ settings 조회 미들웨어                │
+│   (전역 설정 ← 클라이언트별 오버라이드 병합) │
+└───────────┬───────────┬───────────────┘
+            │           │
+            ▼           ▼
+  ┌─────────────────┐ ┌───────────────────────┐
+  │ 메인 DB           │ │ 개인정보 DB(분리, 자리)   │
+  │ SQLite(파일형)     │ │ 이름·연락처·주소 등        │
+  │ - 매칭/정산/신고/   │ │ MVP: 같은 파일 내 테이블  │
+  │   설정 등 도메인 데이터│ │ 분리 / 이후: 물리 DB 분리│
+  └─────────────────┘ └───────────────────────┘
+            │
+            ▼
+┌─────────────────────────────────────────────┐
+│ 교체형 블럭(모의 Provider → 실 연동 자리)         │
+│ - payment/  (무통장 확인 → PG 자리: 토스 등)     │
+│ - verification/ (문자·등기 → 실 SMS/등기 API)   │
+│ - notify/   (화면 동의 버튼 → 실 알림톡 API)     │
+│ - photo/    (자리만 — 사진 업로드/저장소)         │
+└─────────────────────────────────────────────┘
+
+[버전 체크 자동 업데이트 흐름]
+로그인 성공 → 서버가 클라이언트에 최신 버전 번호 응답
+→ 클라이언트 저장 버전과 비교 → 다르면 "업데이트 안내" 배너/모달 표시
+→ (웹) 새로고침 유도 / (앱-자리) 설치 파일 자동 다운로드 링크 제공</pre>
+      </article>
+
+      <article class="sub" id="prd-stack">
+        <h3>기술 스택</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>계층</th><th>현재 채택</th><th>이후 단계</th><th>대안(채택 아님)</th></tr></thead>
+          <tbody>
+            <tr><td>프레임워크</td><td>Next.js (App Router, 화면+API 한 몸으로 서버 하나가 다 처리) — 현재 설치 버전 16.2.10</td><td>서비스 커지면 API와 화면 서버 분리 검토 — 「공란」</td><td>Remix, Nuxt 등</td></tr>
+            <tr><td>언어</td><td>TypeScript (자바스크립트에 타입 안전장치 추가)</td><td>동일 유지</td><td>없음</td></tr>
+            <tr><td>DB</td><td>SQLite + better-sqlite3 (서버 안에 파일 하나로 도는 가벼운 DB, 별도 설치 불필요)</td><td>PostgreSQL 등 별도 DB 서버로 이전 — 「공란」</td><td>MySQL, MongoDB</td></tr>
+            <tr><td>개인정보 저장</td><td>메인 DB 내 테이블 분리(같은 파일, 접근 경로만 분리)</td><td>물리적으로 별도 DB/서버로 완전 분리 — 「공란」</td><td>별도 KMS 연동 암호화 DB</td></tr>
+            <tr><td>스타일</td><td>Tailwind CSS (미리 만든 디자인 부품 조합 방식)</td><td>동일 유지</td><td>없음</td></tr>
+            <tr><td>인증</td><td>세션 쿠키 + 아이디/평문 비번 [모의, 데모 전용]</td><td>bcrypt 등 비밀번호 해시화 + NextAuth 등 정식 인증 — 「공란」</td><td>Auth0, Clerk</td></tr>
+            <tr><td>결제</td><td>무통장 입금 신고 + 관리자 눈 확인 [현행]</td><td>토스페이먼츠 등 PG(결제대행사) Webhook 자동 확인 — 「공란」</td><td>카카오페이, 이니시스</td></tr>
+            <tr><td>문자/등기 인증</td><td>Mock(가짜 인증, 화면에서 즉시/대기 처리)</td><td>실제 SMS API + 실제 등기 우편 발송 API — 「공란」</td><td>NHN Cloud, 카카오 알림톡 인증</td></tr>
+            <tr><td>알림</td><td>화면 내 동의 버튼(Mock)</td><td>카카오 알림톡 API 연동 — 「공란」</td><td>SMS 단순 발송</td></tr>
+            <tr><td>설치형 클라이언트</td><td>없음(웹만)</td><td>Tauri(가벼운 데스크톱 앱 포장 도구)로 VIP용 설치형 배포 — 「공란」</td><td>Electron</td></tr>
+            <tr><td>배포 인프라</td><td>사장님 PC 로컬 실행</td><td>server01~03 자체 서버 → 이후 외부 클라우드 서버 — 「공란」</td><td>AWS/GCP 단독 초기 배포</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </article>
+
+      <article class="sub" id="prd-backend">
+        <h3>백엔드 설계</h3>
+        <h4>현행 테이블 (linker-app/src/lib/db.ts 기준, 이미 구현됨)</h4>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>테이블</th><th>역할</th></tr></thead>
+          <tbody>
+            <tr><td><code>users</code></td><td>회원(신청자/주선자/관리자), 성별·인증상태 포함</td></tr>
+            <tr><td><code>ledger_accounts</code></td><td>회원별 예치금·주선비 잔고</td></tr>
+            <tr><td><code>deposit_requests</code></td><td>입금 신고(최초/잔금) — 관리자 확인 대기</td></tr>
+            <tr><td><code>acquaintances</code></td><td>주선자가 등록한 지인 프로필(로그인 계정 없음)</td></tr>
+            <tr><td><code>proposals</code></td><td>소개 제안(제안→수락→진행→성사)</td></tr>
+            <tr><td><code>meetings</code></td><td>만남 회차 기록(1~3회, 양측 확인)</td></tr>
+            <tr><td><code>settlements</code></td><td>성사비 원장, 주선자 분배</td></tr>
+            <tr><td><code>reports</code></td><td>무관용 신고(4대 조항)</td></tr>
+            <tr><td><code>notices</code></td><td>전체 공지(자동/수동)</td></tr>
+            <tr><td><code>sessions</code></td><td>로그인 세션 토큰</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h4>★신규 — settings 테이블 설계</h4>
+        <p><strong>목적</strong>: 최상위 원칙 "모든 정책을 관리자 페이지에서 선택 → 즉시 적용"을 구현하는 핵심 테이블. 전역 기본값과 클라이언트(개별 PC/계정)별 오버라이드(덮어쓰기)를 분리해서, 특정 유저·특정 단말에만 다른 정책을 걸 수 있게 한다.</p>
+        <pre>CREATE TABLE settings_global (
+  key TEXT PRIMARY KEY,        -- 예: 'broker_rate_default', 'deposit_mode', 'match_threshold_mode'
+  value TEXT NOT NULL,         -- 실제 값(JSON 문자열로 저장 — 숫자/문자/구조체 모두 대응)
+  value_type TEXT NOT NULL,    -- 'number' | 'string' | 'boolean' | 'json'
+  category TEXT NOT NULL,      -- 'fee'(요금) | 'match'(성사기준) | 'deposit'(예치금) | 'ui'(화면) 등
+  label_ko TEXT NOT NULL,      -- 관리자 화면에 보여줄 한글 설명
+  updated_at TEXT NOT NULL,
+  updated_by INTEGER REFERENCES users(id)
+);
+
+CREATE TABLE settings_override (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  scope_type TEXT NOT NULL,    -- 'user'(특정 계정) | 'client'(특정 PC/기기 식별자)
+  scope_id TEXT NOT NULL,      -- user_id 또는 client_id(기기 지문)
+  key TEXT NOT NULL,           -- settings_global.key와 동일 키 체계
+  value TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  updated_by INTEGER REFERENCES users(id),
+  UNIQUE(scope_type, scope_id, key)
+);</pre>
+        <ul>
+          <li><strong>즉시 적용 메커니즘</strong>: 값 변경 시 재배포·재시작 불필요. API가 매 요청마다 <code>settings_global</code> + 해당 유저/클라이언트의 <code>settings_override</code>를 조회해 <strong>오버라이드 우선</strong>으로 병합한 값을 사용(간단한 조회 함수 하나로 전체 서버가 공유). 캐시를 쓸 경우 짧은 TTL(수명, 예: 5~10초)만 적용해 "즉시성"을 해치지 않음.</li>
+          <li><strong>우선순위</strong>: <code>settings_override(client) &gt; settings_override(user) &gt; settings_global &gt; 코드 기본값</code></li>
+          <li><strong>비활성 보존 원칙</strong>: 옵션을 안 쓰기로 해도 행(row)을 지우지 않고 <code>value</code>만 꺼둔 상태로 둠(예: <code>deposit_mode = 'B'</code>로 두면 A모드 관련 값은 존재하되 미사용).</li>
+        </ul>
+
+        <h4>API 그룹 목록</h4>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>그룹</th><th>엔드포인트(대표)</th><th>비고</th></tr></thead>
+          <tbody>
+            <tr><td>인증</td><td><code>/api/auth/login</code>, <code>/signup</code>, <code>/logout</code>, <code>/api/me</code></td><td>세션 쿠키</td></tr>
+            <tr><td>지인 관리</td><td><code>/api/acquaintances</code>, <code>/acquaintances/[id]/consent</code></td><td>성비 룰 적용</td></tr>
+            <tr><td>소개 제안</td><td><code>/api/proposals</code>, <code>/proposals/[id]/accept|decline|ack-warning</code></td><td>v3: 요청형 게시판 API 추가 예정(공란 — 자리: <code>/api/requests</code>)</td></tr>
+            <tr><td>만남 기록</td><td><code>/api/meetings</code></td><td>1~3회(또는 설정값)</td></tr>
+            <tr><td>결제</td><td><code>/api/payments/deposit-request</code>, <code>/api/admin/payments</code>, <code>/[id]/confirm|reject</code></td><td>PG 연동 시 webhook 엔드포인트 추가(공란)</td></tr>
+            <tr><td>신고</td><td><code>/api/reports</code>, <code>/api/admin/reports/[id]/confirm|dismiss</code></td><td>4대 조항</td></tr>
+            <tr><td>정산</td><td><code>/api/settlements</code>, <code>/api/admin/settlements</code>, <code>/[id]/pay</code></td><td></td></tr>
+            <tr><td>공지</td><td><code>/api/notices</code>, <code>/api/admin/notices</code></td><td></td></tr>
+            <tr><td>관리자-회원</td><td><code>/api/admin/users</code>, <code>/[id]/approve|reject</code>, <code>/admin/brokers</code></td><td></td></tr>
+            <tr><td><span class="badge badge-new">v3 신규</span></td><td><code>/api/admin/settings</code> (GET/PUT 전역), <code>/api/admin/settings/override</code> (GET/PUT 스코프별)</td><td>관리자 설정 탭 전용</td></tr>
+            <tr><td><span class="badge badge-new">v3 신규</span></td><td><code>/api/version</code></td><td>로그인 직후 클라이언트가 호출, 최신 버전 번호 반환</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </article>
+
+      <article class="sub" id="prd-frontend">
+        <h3>프런트 설계</h3>
+        <h4>역할별 화면 지도</h4>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>역할</th><th>화면</th><th>기능</th></tr></thead>
+          <tbody>
+            <tr><td>신청자(남/여)</td><td><code>/dashboard</code></td><td>잔고, 받은 제안 수락/거절, 입금 신고</td></tr>
+            <tr><td></td><td><code>/meetings/[제안ID]</code></td><td>경고 팝업 확인 → 만남 기록 → 신고</td></tr>
+            <tr><td></td><td><code>/requests</code> (v3 신규, 요청형)</td><td>"이런 사람 원해요" 게시 → 주선자 응답 대기</td></tr>
+            <tr><td>주선자</td><td><code>/broker/acquaintances</code></td><td>지인 등록(성비 룰) + 동의 처리</td></tr>
+            <tr><td></td><td><code>/broker/propose</code></td><td>소개 제안 발송</td></tr>
+            <tr><td></td><td><code>/broker/settlement</code></td><td>정산 현황</td></tr>
+            <tr><td></td><td><code>/broker/requests</code> (v3 신규)</td><td>신청자가 올린 요청형 게시글에 응답</td></tr>
+            <tr><td>관리자</td><td><code>/admin</code></td><td>가입 승인, 입금 확인, 신고 처리, 공지, 정산</td></tr>
+            <tr><td></td><td><strong><code>/admin/settings</code> (v3 신규)</strong></td><td>아래 "관리자 설정 탭 상세" 참고</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h4>관리자 설정 탭 상세 (v3 신규 — 최상위 원칙 구현 화면)</h4>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>구역</th><th>스위치/입력칸</th><th>연결되는 settings key(예)</th></tr></thead>
+          <tbody>
+            <tr><td>요금 설정</td><td>기본 주선비(숫자 입력, 7~10만 범위) / 성공 사례비(숫자 입력, 50~80만 범위)</td><td><code>fee.basic_amount</code>, <code>fee.success_amount</code></td></tr>
+            <tr><td>분배 비율</td><td>주선자:플랫폼 슬라이더(기본 7:3) + 우수 주선자 추가 우대(%) 입력</td><td><code>settlement.broker_rate_default</code>, <code>settlement.top_broker_bonus_pct</code></td></tr>
+            <tr><td>예치금 모드</td><td>라디오: [A] 선입금 모드 / [B] 신청 후 입금확인 모드</td><td><code>deposit.mode</code></td></tr>
+            <tr><td>여성 요금 모드</td><td>라디오: [동일 요금] / [여성 우대] + 우대 값 입력칸(공란 — 추후 결정)</td><td><code>fee.female_discount_mode</code>, <code>fee.female_discount_value</code>(공란)</td></tr>
+            <tr><td>성사 기준 모드</td><td>라디오: [3회 고정] / [선택형(신청자가 3/5/7회·여행 중 선택)]</td><td><code>match.threshold_mode</code>, <code>match.threshold_options</code></td></tr>
+            <tr><td>소개 방식</td><td>체크박스: 제안형 on/off, 요청형 on/off (둘 다 기본 on)</td><td><code>intro.proposal_enabled</code>, <code>intro.request_enabled</code></td></tr>
+            <tr><td>쿨타임</td><td>동일 지인 월 허용 횟수 입력(기본 3)</td><td><code>match.monthly_cooltime_limit</code></td></tr>
+            <tr><td>클라이언트별 오버라이드</td><td>유저 검색 → 위 항목들을 그 유저에게만 다르게 설정</td><td><code>settings_override</code> 테이블 사용</td></tr>
+            <tr><td>버전 관리</td><td>현재 배포 버전 번호 입력 + "강제 업데이트" on/off</td><td><code>version.current</code>, <code>version.force_update</code></td></tr>
+            <tr><td>서비스 이름</td><td>텍스트 입력(사이트 전체 표시명 — 로고·제목에 반영)</td><td><code>ui.service_name</code> (기본 "만남")</td></tr>
+            <tr><td>결제 방식</td><td>라디오: [무통장 수동 확인] / [PG 자동 확인(자리)]</td><td><code>payment.mode</code></td></tr>
+            <tr><td>사진 기능</td><td>on/off 스위치(자리만, 현재 off 고정)</td><td><code>feature.photo_enabled</code>(공란 — 자리)</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </article>
+
+      <article class="sub" id="prd-security">
+        <h3>보안·방어 설계</h3>
+        <p class="source-note">★0706 확정: MVP 단계에서는 방어 구현을 전부 보류(공란) — 아래 표는 설계 자리만. 외부 공개(배포 단계 ②~③) 전에 일괄 착수.</p>
+
+        <h4>외부 침입 방어 (MVP~단기)</h4>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>항목</th><th>현재</th><th>실서비스 전 필수 조치</th></tr></thead>
+          <tbody>
+            <tr><td>로그인 보호</td><td>세션 쿠키, 평문 비밀번호 [README 명시 한계]</td><td>bcrypt 등 해시 처리 필수 — 「공란, 착수 전」</td></tr>
+            <tr><td>요청 속도 제한(rate limit)</td><td>없음</td><td>로그인·입금신고 등 API에 요청 속도 제한(짧은 시간 반복 요청 차단) 적용 — 「공란」</td></tr>
+            <tr><td>입력 검증</td><td>라우트별 기본 타입 체크 수준</td><td>서버 측 스키마 검증 라이브러리(zod 등) 도입 — 「공란」</td></tr>
+            <tr><td>권한 분리</td><td>role 체크(신청자/주선자/관리자) 존재</td><td>세밀한 권한(예: 내 데이터만 조회) 전수 점검 — 「공란」</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h4>개인정보 분리 저장 (원칙 3 구현)</h4>
+        <ul>
+          <li>MVP 단계: 이름·생년·지역·직업 등은 <code>users</code>/<code>acquaintances</code> 테이블에 있으나, 상세 신상(실명 등기 주소 등 인증에만 쓰는 정보)은 별도 테이블로 분리해 매칭 로직 코드가 직접 조회하지 못하게 함 — 「공란: 분리 테이블 스키마 확정 전, 자리만 마련」</li>
+          <li>이후 단계: 물리적으로 다른 DB/서버로 완전 분리(자료정리 문서의 "유령 DB" 개념) — 「공란」</li>
+        </ul>
+
+        <h4>수수료 정보 숨김 규칙</h4>
+        <ul>
+          <li>지인(<code>acquaintances</code>)은 로그인 계정이 없는 프로필 레코드 — 애초에 화면에 접근 권한 없음(구조적으로 안전)</li>
+          <li>신청자·지인에게 노출되는 모든 화면(제안, 만남, 알림 문구)에서 <code>broker_rate</code>, <code>settlement</code> 관련 필드 미노출 — 코드 리뷰 체크리스트 항목으로 관리 필요 — 「공란: 자동 검수 스크립트」</li>
+        </ul>
+
+        <h4>현행 한계(README 근거) 및 실서비스 전 필수 조치</h4>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>한계 (linker-app/README.md 명시)</th><th>실서비스 전 조치</th></tr></thead>
+          <tbody>
+            <tr><td>비밀번호 평문 저장</td><td>bcrypt 해시화 — 「공란」</td></tr>
+            <tr><td>주선자 보증금 계좌 개념 없음(연대 몰수 시 0 처리)</td><td><code>ledger_accounts</code>에 주선자 보증금 필드 추가 — 「공란」</td></tr>
+            <tr><td>알림/문자/등기/PG 전부 [모의]</td><td>실 연동 — 「공란」</td></tr>
+            <tr><td>신고 대상 특정 어려움(지인은 로그인 계정 없음)</td><td>신고 대상 식별 구조 개선 — 「공란」</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h4>장기 보안 로드맵 (자료정리 문서 참고, 아직 미착수)</h4>
+        <ul>
+          <li>빈 대문 서버(Gateway, DB 없이 안내만) + 유령 DB(내부망 전용) 분리 구조 — 「공란」</li>
+          <li>mTLS(서버-DB 간 상호 인증서 확인), AES-256 필드 암호화 — 「공란」</li>
+          <li>불변 인프라(서버 직접 수정 불가) + 불변 감사 로그 — 「공란」</li>
+          <li>다중 페일오버(공격 시 서버 폐쇄 후 예비 서버 전환) — 「공란」</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="prd-payment">
+        <h3>결제·정산 설계</h3>
+        <h4>현행 흐름 (무통장 입금)</h4>
+        <ol>
+          <li>신청자가 입금 후 "입금 신고"(<code>deposit_requests</code>, kind=initial/final)</li>
+          <li>관리자가 <code>/admin</code> 콘솔에서 육안 확인 → 승인(confirm)/반려(reject)</li>
+          <li>승인 시 <code>ledger_accounts</code> 잔고 반영</li>
+        </ol>
+
+        <h4>예치금 모드 A/B (관리자 스위치)</h4>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>모드</th><th>흐름</th><th>상태</th></tr></thead>
+          <tbody>
+            <tr><td>A. 선입금 모드</td><td>가입 즉시 예치금 5 + 주선비 1 선입금 요구</td><td>구현(현행 기본)</td></tr>
+            <tr><td>B. 신청 후 입금확인 모드</td><td>예치금 없이 신청 → 소개 성사 임박 시 입금 확인 후 연결</td><td>「공란 — 로직 자리만, 관리자 스위치로 전환 가능하게 설계」</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h4>주선비 2종 원장</h4>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>종류</th><th>금액 범위</th><th>시점</th></tr></thead>
+          <tbody>
+            <tr><td>기본 주선비</td><td>7~10만 원(관리자 조정)</td><td>소개 제안 수락 시</td></tr>
+            <tr><td>성공 사례비</td><td>50~80만 원(관리자 조정)</td><td>3회(또는 선택 기준) 만남 성사 시</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>현 코드의 <code>TOTAL_SUCCESS_FEE = 10</code>(상대값), <code>broker_rate</code> 기본 0.5는 <strong>설정값으로 이관 예정</strong> — settings 테이블 연결이 v3 구현 1순위.</p>
+
+        <h4>몰수/환불</h4>
+        <ul>
+          <li>무관용 4대 조항(폭력·포교·사업·돈) 위반 확정 시: 가해자 예치금 전액 몰수 + 해당 건 주선자 연대 몰수 + 피해자 즉시 환불 + 자동 전체 공지</li>
+          <li>일반 환불: 매칭 이력 없으면 즉시 환불 / 있으면 환불 대기(유예) 후 관리자 처리</li>
+          <li>환불 계좌는 입금한 본인 명의 계좌로만(자금세탁 방지) — 계좌 검증 로직은 「공란 — 추후 결정」</li>
+        </ul>
+
+        <h4>PG(결제대행사) 연동 자리</h4>
+        <ul>
+          <li>현재: <code>TossProvider.stub.ts</code> 파일이 이미 자리로 존재(구현 없음, 인터페이스만)</li>
+          <li>실 연동 시: 웹훅(결제사가 보내는 입금 알림 신호)의 디지털 서명 검증 로직 추가 필요 — 「공란」</li>
+          <li>카드 결제 최소화, 현금성 결제(가상계좌) 우선 방침 유지</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="prd-admin-table">
+        <h3>★관리자 옵션 전체 총괄표</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>옵션명</th><th>선택지</th><th>기본값</th><th>적용 방식(즉시)</th></tr></thead>
+          <tbody>
+            <tr><td>서비스 이름</td><td>텍스트(표시명 자유 변경)</td><td>만남(임시)</td><td>즉시 반영</td></tr>
+            <tr><td>결제 방식</td><td>무통장(수동 확인) / PG 자동 확인(자리)</td><td>무통장</td><td>즉시 반영 (PG는 블럭 연결 후 활성화)</td></tr>
+            <tr><td>기본 주선비</td><td>숫자(원, 7만~10만 권장)</td><td>7만 원</td><td>settings_global 변경 즉시 반영</td></tr>
+            <tr><td>성공 사례비</td><td>숫자(원, 50만~80만 권장)</td><td>50만 원</td><td>즉시 반영</td></tr>
+            <tr><td>분배 비율(주선자:플랫폼)</td><td>슬라이더(예 6:4~9:1)</td><td>7:3</td><td>즉시 반영</td></tr>
+            <tr><td>우수 주선자 추가 우대</td><td>%(숫자)</td><td>0%(자리만)</td><td>즉시 반영, 기준은 공란</td></tr>
+            <tr><td>예치금 모드</td><td>A(선입금) / B(입금확인 후 연결)</td><td>A</td><td>즉시 반영(단, 진행 중 건은 시작 시점 모드 유지 원칙 — 공란: 전환 시점 규칙)</td></tr>
+            <tr><td>여성 요금 모드</td><td>동일 요금 / 여성 우대</td><td>동일 요금</td><td>즉시 반영, 우대 값은 공란</td></tr>
+            <tr><td>성사 기준 모드</td><td>3회 고정 / 선택형(3·5·7회·여행 등)</td><td>3회 고정</td><td>즉시 반영</td></tr>
+            <tr><td>소개 방식</td><td>제안형 on/off, 요청형 on/off</td><td>둘 다 on</td><td>즉시 반영</td></tr>
+            <tr><td>동일 지인 월 소개 한도(쿨타임)</td><td>숫자(회)</td><td>3회</td><td>즉시 반영</td></tr>
+            <tr><td>사진 기능</td><td>on/off</td><td>off(자리만)</td><td>즉시 반영(켜도 실제 업로드 미구현)</td></tr>
+            <tr><td>클라이언트별 오버라이드</td><td>특정 유저/기기에 위 항목 개별 지정</td><td>없음(전역값 상속)</td><td>즉시 반영</td></tr>
+            <tr><td>버전 강제 업데이트</td><td>on/off</td><td>off</td><td>즉시 반영</td></tr>
+            <tr><td>관리자 운영 모드</td><td>단독 콘솔 / 자동화 단계(공란)</td><td>단독 콘솔</td><td>단계 전환 시 공란</td></tr>
+            <tr><td>배포 단계</td><td>PC / server01~03 / 외부 서버</td><td>PC</td><td>인프라 전환 필요(코드 즉시반영 아님)</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </article>
+
+      <article class="sub" id="prd-deploy">
+        <h3>배포·운영 단계</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>단계</th><th>환경</th><th>비고</th></tr></thead>
+          <tbody>
+            <tr><td>① 현재</td><td>사장님 PC 로컬 실행(<code>npm run dev</code>/<code>start</code>)</td><td>SQLite 파일 로컬</td></tr>
+            <tr><td>② 다음</td><td>server01~03 자체 서버</td><td>사내 서버로 이전, DB 파일 백업 체계 필요 — 「공란」</td></tr>
+            <tr><td>③ 이후</td><td>외부 서버(클라우드)</td><td>도메인·HTTPS 인증서·PG 실연동 등 필요 — 「공란」</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p><strong>버전체크 자동 업데이트</strong>: 각 단계 전환 시에도 <code>/api/version</code> 값만 올리면 클라이언트가 자동 감지(위 시스템 아키텍처 구성도 참고)</p>
+      </article>
+
+      <article class="sub" id="prd-blank">
+        <h3>공란(미결정) 목록 총정리</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>#</th><th>미정 항목</th><th>자리를 만들어둔 위치</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>서비스 이름 최종안 (0706 확정: 관리자 설정 <code>ui.service_name</code>으로 언제든 변경, 임시 "만남")</td><td><code>settings_global.ui.service_name</code></td></tr>
+            <tr><td>2</td><td>여성 우대 모드 구체 값</td><td><code>settings_global.fee.female_discount_value</code></td></tr>
+            <tr><td>3</td><td>우수 주선자 기준(건수/성사율)</td><td><code>settings_global.settlement.top_broker_bonus_pct</code> 옆 기준 필드</td></tr>
+            <tr><td>4</td><td>DB PostgreSQL 전환 시점</td><td>기술스택 표 "이후 단계" 칸</td></tr>
+            <tr><td>5</td><td>개인정보 물리 DB 분리 방식</td><td>보안·방어 설계 항목, 시스템 아키텍처 우측 박스</td></tr>
+            <tr><td>6</td><td>비밀번호 해시화 등 보안 조치 (0706 확정: MVP 보류, 외부 공개 전 일괄 착수 — 구체 시점만 공란)</td><td>보안·방어 설계 표</td></tr>
+            <tr><td>7</td><td>rate limit·입력검증 라이브러리 선정</td><td>보안·방어 설계 표</td></tr>
+            <tr><td>8</td><td>주선자 보증금 필드 설계</td><td>보안 한계 표, <code>ledger_accounts</code> 확장 예정</td></tr>
+            <tr><td>9</td><td>예치금 모드 A→B 전환 시 진행 중 건 처리 규칙</td><td>총괄표 "예치금 모드" 비고</td></tr>
+            <tr><td>10</td><td>PG(토스 등) 실연동 시점</td><td><code>TossProvider.stub.ts</code>, 결제·정산 설계</td></tr>
+            <tr><td>11</td><td>실 SMS/등기/알림톡 연동 시점</td><td><code>verification/</code>, <code>notify/</code> 모듈</td></tr>
+            <tr><td>12</td><td>사진 업로드 기능 착수 시점</td><td><code>feature.photo_enabled</code></td></tr>
+            <tr><td>13</td><td>Tauri 설치형 앱(VIP) 착수 시점</td><td>시스템 아키텍처 구성도 좌측 "설치형 앱(자리)"</td></tr>
+            <tr><td>14</td><td>장기 보안 인프라(유령 DB·mTLS·불변 인프라 등) 착수 시점</td><td>장기 보안 로드맵</td></tr>
+            <tr><td>15</td><td>관리자 운영 자동화 단계 전환 기준</td><td>총괄표 "관리자 운영 모드"</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </article>
+
+      <article class="sub" id="prd-roadmap">
+        <h3>구현 로드맵 (v2 구현항목 1~10 연결)</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>순서</th><th>작업</th><th>v2 항목 연결</th><th>비고</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><code>settings_global</code> / <code>settings_override</code> 테이블 + 관리자 설정 탭</td><td>1</td><td>최우선 — 이후 모든 옵션이 이 위에서 동작</td></tr>
+            <tr><td>2</td><td>주선비 2종 원장 반영(기본/성공 사례비 분리 컬럼)</td><td>2</td><td>settlements 테이블 확장</td></tr>
+            <tr><td>3</td><td>예치금 모드 A/B 스위치 연결</td><td>3</td><td>settings 연결 필요(1 선행)</td></tr>
+            <tr><td>4</td><td>요청형 소개 게시판(<code>/requests</code>, <code>/broker/requests</code>)</td><td>4</td><td>신규 테이블+화면</td></tr>
+            <tr><td>5</td><td>우수 주선자 우대(+%) 로직</td><td>5</td><td>settlement 계산식에 반영</td></tr>
+            <tr><td>6</td><td>성사 기준 모드 스위치(고정/선택형)</td><td>6</td><td><code>matching/rules.ts</code> 상수 → settings 조회로 전환</td></tr>
+            <tr><td>7</td><td>수수료 정보 숨김 처리 검수(화면 전수 점검)</td><td>7</td><td>QA 체크리스트화</td></tr>
+            <tr><td>8</td><td>버전 체크 API + 로그인 시 업데이트 안내</td><td>8</td><td><code>/api/version</code> 신규</td></tr>
+            <tr><td>9</td><td>클라이언트별 개별 설정 오버라이드 UI</td><td>9</td><td>1과 함께 진행</td></tr>
+            <tr><td>10</td><td>개인정보 분리 저장 구조(테이블 분리 우선)</td><td>10</td><td>물리 DB 분리는 공란</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>권장 착수 순서: <strong>1 → 2·3·6(설정 의존) → 4·5 → 7(검수) → 8·9 → 10</strong></p>
+        <div class="todo-box">
+          <h4>사장님께 여쭤봐야 할 어려운 결정 후보 (남은 3개)</h4>
+          <ol>
+            <li><strong>여성 우대 모드 구체 값</strong> — 예치금만 면제? 전액 면제? 몇 % 할인?</li>
+            <li><strong>우수 주선자 기준</strong> — 성사 건수 기준(예: 월 3건 이상)인지, 성사율 기준(예: 80% 이상)인지?</li>
+            <li><strong>예치금 모드 A→B 전환 시 진행 중 건</strong> — 이미 A모드로 낸 사람이 있는데 B로 바꾸면 그 사람 건은 어떻게 처리할지?</li>
+          </ol>
+          <p class="source-note">(기존 후보 4·5번 — 보안 착수 시점, 서비스 이름 — 은 0706 사장님 답변으로 확정되어 위 "0706 확정 답변 4건"에 반영 완료)</p>
+        </div>
+      </article>
+
+      <article class="sub" id="prd-audit">
+        <h3>현재 코드 현황(실사)</h3>
+        <p class="source-note">출처: _작업/0706_linker-app_실사.md (2026-07-06 코드 정독, 빌드/실행 없이 정적 분석). 규모: 화면 10개 라우트 · API 29개 라우트.</p>
+
+        <h4>① PRD v2 구현항목 1~10 대비 현황표</h4>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>#</th><th>PRD 구현 항목</th><th>상태</th><th>근거</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>settings 테이블 + 관리자 설정 탭 (정책값 즉시반영)</td><td><span class="badge badge-warn">없음</span></td><td><code>src/lib/db.ts</code> 전체에 settings 테이블 CREATE 없음. <code>src/app/admin/page.tsx</code> 6개 탭 중 "설정" 탭 없음</td></tr>
+            <tr><td>2</td><td>주선비 2종 원장 반영(기본/성공 사례비 분리)</td><td><span class="badge badge-warn">없음</span></td><td><code>settlements</code> 테이블은 <code>total_fee</code> 단일 칼럼만 보유. <code>rules.ts</code>의 상수도 데모용 단위(1/5/10) 그대로</td></tr>
+            <tr><td>3</td><td>예치금 모드 A/B 스위치</td><td><span class="badge badge-warn">없음</span></td><td><code>payment</code> 모듈은 "입금신고→관리자확인" 단일 흐름만 존재</td></tr>
+            <tr><td>4</td><td>요청형 소개 게시판(신청자→주선자)</td><td><span class="badge badge-warn">없음</span></td><td>라우트 목록에 요청 게시판 경로 없음. <code>matching</code> 모듈은 제안형(주선자→신청자)만 구현</td></tr>
+            <tr><td>5</td><td>우수 주선자 우대(+5%) 로직</td><td><span class="badge badge-warn">없음</span></td><td><code>createSettlementOnMatch</code>는 <code>DEFAULT_BROKER_RATE</code>(0.5) 고정 사용, 우대 가산 로직 없음</td></tr>
+            <tr><td>6</td><td>성사 기준 모드 스위치(고정/선택형)</td><td><span class="badge badge-warn">없음(고정 3회만)</span></td><td><code>MEETING_TO_MATCH = 3</code> 상수 하나만 존재, 선택 UI·로직 없음</td></tr>
+            <tr><td>7</td><td>지인·상대 화면 수수료 정보 숨김 처리 검수</td><td><span class="badge badge-accent">부분</span></td><td>결과적으로 노출은 안 되나(보여줄 화면 자체가 없음), 명시적 검수 로직·테스트는 없음</td></tr>
+            <tr><td>8</td><td>버전 체크 API + 로그인 시 자동 업데이트 안내</td><td><span class="badge badge-warn">없음</span></td><td>API 목록에 버전 관련 라우트 없음</td></tr>
+            <tr><td>9</td><td>클라이언트별 개별 설정 오버라이드</td><td><span class="badge badge-warn">없음</span></td><td>settings 테이블 자체가 없으므로 오버라이드 개념도 없음</td></tr>
+            <tr><td>10</td><td>개인정보 분리 저장 구조</td><td><span class="badge badge-warn">없음</span></td><td><code>users</code> 테이블 하나에 인증정보+개인정보 모두 통합, 별도 테이블/파일 분리 없음</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p><strong>요약: 10개 중 9개 "없음", 1개("수수료 숨김") "부분".</strong> 현재 코드베이스는 v1 수준의 데모 MVP(단일 정책값 하드코딩 + 제안형 소개만 구현)이며, "관리자 설정으로 정책 전환" 방향은 아직 착수 전.</p>
+
+        <h4>② 정책값 하드코딩 위치 요약 (rules.ts 등)</h4>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>정책값</th><th>현재 값</th><th>파일:줄</th></tr></thead>
+          <tbody>
+            <tr><td>예치금</td><td>5</td><td><code>src/modules/matching/rules.ts:6</code> (INITIAL_DEPOSIT)</td></tr>
+            <tr><td>최초 주선비 선납</td><td>1</td><td><code>rules.ts:7</code> (INITIAL_BROKER_FEE)</td></tr>
+            <tr><td>성사 시 잔금</td><td>5</td><td><code>rules.ts:8</code> (FINAL_PAYMENT)</td></tr>
+            <tr><td>총 성사비</td><td>10</td><td><code>rules.ts:11</code> (TOTAL_SUCCESS_FEE)</td></tr>
+            <tr><td>주선자 분배 비율</td><td>0.5(50%)</td><td><code>rules.ts:12</code> (DEFAULT_BROKER_RATE) — PRD는 7:3 요구, 상이</td></tr>
+            <tr><td>성사 기준 만남 횟수</td><td>3회 고정</td><td><code>rules.ts:4</code> (MEETING_TO_MATCH)</td></tr>
+            <tr><td>동일 지인 월 소개 한도</td><td>3회</td><td><code>rules.ts:5</code> (MONTHLY_COOLTIME_LIMIT)</td></tr>
+            <tr><td>settlements.total_fee 기본값</td><td>10</td><td><code>src/lib/db.ts:112</code> — rules.ts와 이원화 위험</td></tr>
+            <tr><td>settlements.broker_rate 기본값</td><td>0.5</td><td><code>src/lib/db.ts:113</code> — 이원화 위험</td></tr>
+            <tr><td>신고 확정 시 환불 예치금 재설정값</td><td>5(고정)</td><td><code>src/modules/settlement/service.ts:82</code></td></tr>
+            <tr><td>남자 주선자 성비 룰</td><td>하드코딩 로직</td><td><code>rules.ts:15-21</code> (canRegisterAcquaintance) — on/off 스위치 없음</td></tr>
+            <tr><td>여성 우대요금/예치금 모드 B/우수주선자 우대</td><td>미구현</td><td>해당 없음 — 코드에 분기 자체가 없음</td></tr>
+            <tr><td>개인정보 분리 저장</td><td>미구현</td><td><code>src/lib/db.ts</code> — users 테이블에 전부 통합 저장</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h4>③ 규모 요약</h4>
+        <ul>
+          <li><strong>화면 10개 라우트</strong>: <code>/</code>, <code>/login</code>, <code>/signup</code>, <code>/dashboard</code>, <code>/meetings/[id]</code>, <code>/notices</code>, <code>/admin</code>, <code>/broker/acquaintances</code>, <code>/broker/propose</code>, <code>/broker/settlement</code> (레이아웃 제외)</li>
+          <li><strong>API 29개 라우트</strong>: 인증·지인관리·소개제안·만남기록·결제·신고·정산·공지·관리자(회원/입금/신고/공지/주선자/정산) 그룹으로 구성</li>
+          <li><strong>모듈 실사</strong>: <code>matching / settlement / report / notice</code> = 실제 로직. <code>payment / verification / notify</code> = 전부 [모의](Mock)</li>
+          <li>시드 계정 7개(관리자1·주선자2·신청자4) 존재하나, 실사 시점 기준 <code>data/</code> 폴더 없음 → DB 한 번도 생성/시드된 적 없는 상태</li>
+        </ul>
+      </article>
+    </section>
+
+    <!-- ============ 0-B. 시장조사 (0706) — 신규 ============ -->
+    <section class="cat new-section" id="cat-mr0706">
+      <h2>🆕 시장조사 (0706)</h2>
+      <div class="source-note">원본: _작업/0706_시장조사_오픈소스스킬.md + _작업/0706_시장조사_디자인.md (검색일 2026-07-06 · 모든 항목 URL 근거 원칙, 확인 못한 항목은 솔직 표기)</div>
+
+      <article class="sub" id="mr-1">
+        <h3>1. 오픈소스·라이브러리</h3>
+        <h4>데이팅/매칭 오픈소스 프로젝트 (GitHub)</h4>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>이름</th><th>URL</th><th>스타·활동</th><th>라이선스</th><th>스택</th><th>우리가 가져다 쓸 만한 부분</th></tr></thead>
+          <tbody>
+            <tr><td><strong>NextMatch</strong> (social-dating-app-nextjs-react)</td><td><a href="https://github.com/elvan/social-dating-app-nextjs-react/">github.com/elvan/social-dating-app-nextjs-react</a></td><td>스타 7, 포크 7, 워처 2, 이슈 0, 커밋 14개 — 소규모/저활성</td><td>저장소 페이지에 명시 안 됨 (확인 필요)</td><td>Next.js, React, NextUI, TailwindCSS, Node.js, Prisma, Pusher(실시간), NextAuth, PostgreSQL, Cloudinary</td><td>실시간 알림(Pusher) 구조, 사진 검수(관리자 승인/거절) 플로우, 멤버 필터링(나이·성별·사진유무) 로직, 좋아요 토글 컴포넌트 — 단 우리는 지인 주선 구조라 "매칭 알고리즘"보다 <strong>채팅/사진검수 UI 패턴</strong>이 참고 가치 높음</td></tr>
+            <tr><td><strong>Mrkouhadi/dating-app</strong></td><td><a href="https://github.com/Mrkouhadi/dating-app">github.com/Mrkouhadi/dating-app</a></td><td>스타 11, 커밋 11개 — 소규모, README 기능 설명 제한적</td><td>명시 안 됨</td><td>Next.js, TypeScript, Tailwind CSS</td><td>폴더 구조(app/components/assets/styles)만 참고 가능한 수준. 기능 상세 불명 — 코드 직접 열람 필요</td></tr>
+            <tr><td><strong>Krasipeace/Dating-App</strong> (Heartbound)</td><td><a href="https://github.com/Krasipeace/Dating-App">github.com/Krasipeace/Dating-App</a></td><td>"채팅 시스템 포함 풀스택 Next.js 앱"으로만 소개, 스타/라이선스 미확인</td><td>미확인</td><td>Next.js 기반 (상세 미확인)</td><td>채팅 시스템 구현 참고용 — 상세는 직접 클론 후 확인 필요</td></tr>
+            <tr><td><strong>erikpeik/Matcha</strong></td><td><a href="https://github.com/erikpeik/Matcha">github.com/erikpeik/Matcha</a></td><td>42서울 교육과정 프로젝트, 스타/라이선스 미확인</td><td>미확인</td><td>React, Node.js, PostgreSQL</td><td>선호/지역 기반 프로필 탐색, 실시간 좋아요·매칭 알림 — 참고용, Next.js 아님(순수 React+Node 분리형)</td></tr>
+            <tr><td><strong>lcordenod/42_www_matcha</strong></td><td><a href="https://github.com/lcordenod/42_www_matcha">github.com/lcordenod/42_www_matcha</a></td><td>42 교육과정 프로젝트, 스타/라이선스 미확인</td><td>미확인</td><td>React, Node.js, MySQL</td><td>위와 동일 계열(42 Matcha 과제) — 구조 유사, 중복 참고 불필요</td></tr>
+            <tr><td><strong>stable marriage / matching-algorithm 계열</strong></td><td><a href="https://github.com/marmelab/marriage-algorithms">github.com/marmelab/marriage-algorithms</a>, <a href="https://github.com/omrawal/Stable-Matching">github.com/omrawal/Stable-Matching</a></td><td>알고리즘 실습용 저장소, 스타 미확인</td><td>미확인</td><td>언어 다양(저장소별 확인 필요)</td><td><strong>우리 서비스와 무관에 가까움</strong> — "지인 주선자가 수동으로 소개"하는 구조라 Gale-Shapley식 자동 매칭 알고리즘이 필요 없음. 자동 매칭 기능을 나중에 추가할 경우에만 참고 가치</td></tr>
+            <tr><td>매트리모니(결혼정보) 계열 — <strong>WedMate</strong></td><td><a href="https://github.com/mk-munna/wedmate-matrimony-client-project-12">github.com/mk-munna/wedmate-matrimony-client-project-12</a></td><td>스타/활동 미확인</td><td>미확인</td><td>MERN(MongoDB, Express, React, Node)</td><td>Next.js/SQLite 스택 아님 — 참고 가치 낮음. 매트리모니 화면 구성(프로필 카드 등) UI 레퍼런스로만 가능</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p><strong>총평</strong>: "지인이 중간에서 주선하고 수수료를 받는" 구조(우리 서비스의 핵심 차별점)를 그대로 구현한 오픈소스는 <strong>검색 결과상 없음</strong>. 위 프로젝트들은 전부 "본인 대 본인 자동/직접 매칭"형 데이팅 앱이라 매칭 로직 자체는 재사용 불가하고, <strong>채팅·사진검수·프로필 필터링·관리자 승인 UI</strong> 패턴만 부분 참고 가능한 수준. 스타 수가 전부 한 자릿수~십여 개로 활성도가 낮아 프로덕션 품질 기대는 어려움 — 코드 리뷰용 참고 자료 정도로만 취급 권장.</p>
+
+        <h4>Next.js + SQLite 스택용 스킬·라이브러리</h4>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>항목</th><th>URL</th><th>한 줄 평</th></tr></thead>
+          <tbody>
+            <tr><td><strong>next-shadcn-dashboard-starter</strong> (Kiranism)</td><td><a href="https://github.com/Kiranism/next-shadcn-dashboard-starter">github.com/Kiranism/next-shadcn-dashboard-starter</a></td><td>Next.js 16 + shadcn/ui + TypeScript 관리자 대시보드 스타터. 서버사이드 데이터 테이블(검색/필터/페이지네이션), 인증, 차트 내장 — <strong>관리자 콘솔(가입승인·입금확인·신고처리) 화면의 뼈대로 가장 적합한 후보</strong></td></tr>
+            <tr><td><strong>next-shadcn-admin-dashboard</strong> (arhamkhnz)</td><td><a href="https://github.com/arhamkhnz/next-shadcn-admin-dashboard">github.com/arhamkhnz/next-shadcn-admin-dashboard</a></td><td>Next.js 16 + shadcn UI. 테마 프리셋, 접이식 사이드바 — 좌측 메뉴형 관리자 화면 레이아웃 참고용</td></tr>
+            <tr><td><strong>shadcn-dashboard-landing-template</strong> (shadcnstore)</td><td><a href="https://github.com/shadcnstore/shadcn-dashboard-landing-template">github.com/shadcnstore/shadcn-dashboard-landing-template</a></td><td>shadcn/ui v3 + Tailwind v4, 대시보드+랜딩페이지 세트(메일/태스크/채팅/캘린더 앱 포함) — 관리자 설정(settings) 탭 UI 참고용</td></tr>
+            <tr><td><strong>better-sqlite3</strong></td><td><a href="https://github.com/WiseLibs/better-sqlite3">github.com/WiseLibs/better-sqlite3</a></td><td>우리 PRD가 이미 채택한 라이브러리 본가. 동기 API로 Next.js Route Handler에서 쓰기 간단 — 이미 확정 스택이므로 별도 대안 검토 불필요</td></tr>
+            <tr><td><strong>Nextjs_SqliteDB_CRUD</strong> (sinha2773)</td><td><a href="https://github.com/sinha2773/Nextjs_SqliteDB_CRUD">github.com/sinha2773/Nextjs_SqliteDB_CRUD</a></td><td>Next.js+SQLite로 Superadmin/Admin/User 3단계 역할 기반 CRUD 구현 예시 — 우리 관리자/주선자/신청자 3역할 구조와 유사해 인증·권한 분기 코드 패턴 참고 가치 있음</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p><strong>총평</strong>: 관리자 대시보드는 <strong>next-shadcn-dashboard-starter</strong>를 뼈대로 가져다 쓰는 게 가장 합리적(활성도 높고 shadcn 생태계라 Tailwind 조합도 매끄러움).</p>
+      </article>
+
+      <article class="sub" id="mr-2">
+        <h3>2. 결제·연동 참고 (토스페이먼츠·카카오 알림톡)</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>항목</th><th>URL</th><th>한 줄 평</th></tr></thead>
+          <tbody>
+            <tr><td><strong>토스페이먼츠 결제위젯 연동 (공식 문서)</strong></td><td><a href="https://docs.tosspayments.com/guides/payment-widget/integration">docs.tosspayments.com/guides/payment-widget/integration</a></td><td>공식 가이드. Client Key(FE)/Secret Key(BE) 분리, JS SDK로 위젯 렌더 → 서버에서 결제 승인 API 처리 → successUrl/failureUrl 리다이렉트 흐름. <strong>PRD의 "PG 블럭 자리" 구현 시 1차 참고 문서로 확정</strong></td></tr>
+            <tr><td><strong>토스페이먼츠 결제창 연동 V1 (공식 문서)</strong></td><td><a href="https://docs.tosspayments.com/guides/payment/integration">docs.tosspayments.com/guides/payment/integration</a></td><td>위젯 방식 대신 결제창(팝업) 방식 연동 가이드 — 더 단순한 대안</td></tr>
+            <tr><td><strong>토스 페이먼츠 Next.js+TypeScript 실전 후기</strong> (velog)</td><td><a href="https://velog.io/@sanghyeon/%ED%86%A0%EC%8A%A4-%ED%8E%98%EC%9D%B4%EB%A8%BC%EC%B8%A0-API%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-%EA%B2%B0%EC%A0%9C-%EC%9C%84%EC%A0%AF-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0-Feat.-NextJS-TypeScript">velog.io/@sanghyeon/... (결제위젯 구현 후기)</a></td><td>개인 개발자의 Next.js+TS 결제위젯 구현 후기 — 공식 문서 보완용 실전 코드 예시</td></tr>
+            <tr><td><strong>SOLAPI</strong> (카카오 알림톡 대행사)</td><td><a href="https://solapi.com/guides/kakao-ata-guide">solapi.com/guides/kakao-ata-guide</a>, <a href="https://solapi.com/developers/sdk/start">solapi.com/developers/sdk/start</a></td><td>카카오 알림톡은 카카오가 직접 API를 주지 않고 공식 딜러사(SOLAPI·팝빌·알리고 등)를 통해서만 발송 가능. SOLAPI Node.js SDK 존재 여부·가격은 <strong>페이지 접근 제한으로 확인 못함</strong> — 직접 가입 후 콘솔 확인 필요</td></tr>
+            <tr><td><strong>팝빌(Popbill) 카카오톡 API — Node.js</strong></td><td><a href="https://developers.popbill.com/reference/kakaotalk/node/api">developers.popbill.com/reference/kakaotalk/node/api</a></td><td>Node.js SDK 공식 제공 확인됨. package.json에 SDK 추가 후 npm install, SendATS 함수로 알림톡 발송 — PRD의 <code>notify/</code> Mock Provider를 실 연동으로 교체할 때 <strong>후보 1순위</strong></td></tr>
+            <tr><td><strong>알리고(Aligo) 카카오 알림톡 API</strong></td><td><a href="https://smartsms.aligo.in/alimapi.html">smartsms.aligo.in/alimapi.html</a></td><td>Node.js 예제 제공 명시됨(검색 결과 기준) — 팝빌과 함께 비교 후보. 상세 가격·SDK 코드는 가입 후 확인 필요</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p><strong>총평</strong>: 결제는 토스페이먼츠 공식 문서가 가장 신뢰도 높은 근거이며, 알림톡은 팝빌 Node.js SDK가 문서상 가장 명확히 확인됨.</p>
+      </article>
+
+      <article class="sub" id="mr-3">
+        <h3>3. 유사 서비스 — 지인 소개 기반 매칭</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>서비스</th><th>URL</th><th>기능·구조</th><th>요금 구조</th></tr></thead>
+          <tbody>
+            <tr><td><strong>내친소 (naechinso)</strong></td><td><a href="https://naechinso.com/">naechinso.com</a>, <a href="https://apps.apple.com/kr/app/%EB%82%B4%EC%B9%9C%EC%86%8C-%EC%B9%9C%EA%B5%AC%EA%B0%80-%ED%95%B4%EC%A3%BC%EB%8A%94-%EC%8B%A0%EB%A2%B0%EC%9E%88%EB%8A%94-%EC%86%8C%EA%B0%9C%ED%8C%85-%EC%97%B0%EC%95%A0-%EC%B9%9C%EA%B5%AC-%EC%A7%81%EC%9E%A5%EC%9D%B8/id1669032147">App Store</a></td><td>"모르는 사람 말고 친구한테 받는 소개팅" — 소개자(친구)가 지인을 추천하고 추천사(평판)를 작성, 신청자는 그 추천사를 보고 신뢰. <strong>우리 서비스와 컨셉이 가장 가까운 직접 경쟁/유사 서비스</strong></td><td>구체적 수수료·성사비 금액은 이번 검색으로 <strong>확인 못함</strong>(공식 사이트/앱스토어에 금액 명시 없음, <a href="https://eopla.net/magazines/9137">eopla 기사</a>는 "소개자가 돈을 벌 수 있다"는 문구만 확인, 회원가입 벽으로 원문 확인 불가). 확실한 건: 친구(소개자)에게 금전적 보상을 주는 모델이라는 점</td></tr>
+            <tr><td><strong>정오의데이트 (NoonDate)</strong></td><td><a href="https://apps.apple.com/kr/app/%EC%A0%95%EC%98%A4%EC%9D%98%EB%8D%B0%EC%9D%B4%ED%8A%B8-%EC%86%8C%EA%B0%9C%ED%8C%85-%EB%8F%99%EB%84%A4%EC%B9%9C%EA%B5%AC-%EB%8D%B0%EC%9D%B4%ED%8A%B8-%EB%A7%8C%EB%82%A8/id427242564">App Store</a></td><td>매일 정오 소개팅 상대 2명 자동 추천 + "지인 차단" 기능(내 지인에게 내 프로필 노출 안 함)</td><td>부분 유료 — 무료 이용 시 좋아요·메시지 제한, 프리미엄 결제로 해제 (앱스토어 설명 기준). <strong>지인 기반 주선 구조는 아님</strong>(자동 매칭형)</td></tr>
+            <tr><td><strong>썸타임 (Somtime)</strong></td><td><a href="https://apps.apple.com/kr/app/%EC%8D%B8%ED%83%80%EC%9E%84-%EC%A7%80%EC%97%AD-%EB%8C%80%ED%95%99%EC%83%9D-%EC%86%8C%EA%B0%9C%ED%8C%85/id6746120889">App Store</a></td><td>대학생 전용, 학생증 인증 후 주 2회 무료 매칭</td><td>기본 무료 + 유료 옵션 존재(상세 미확인). 지인 주선 구조 아님</td></tr>
+            <tr><td><strong>결혼정보회사 일반 모델</strong></td><td><a href="https://namu.wiki/w/%EA%B2%B0%ED%98%BC%EC%A0%95%EB%B3%B4%ED%9A%8C%EC%82%AC">나무위키 — 결혼정보회사</a></td><td>소개비 명목 비용 지불 후 계약 기간(보통 1년) 내 정해진 횟수만큼 소개, 소개 1회마다 횟수 차감</td><td>계약형 정액제 — 우리 PRD의 "무통장 입금 → 성사비" 방식과 달리 <strong>선불 계약금 모델</strong>. 우리는 성사 시에만 과금하는 구조라 이 지점이 명확한 차별점</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p><strong>총평</strong>: "지인이 직접 소개하고 그 지인이 금전 리워드를 받는" 구조로 국내에서 가장 근접한 서비스는 <strong>내친소</strong>이며, 사실상 직접 경쟁 서비스로 봐야 함. 다만 내친소의 정확한 수수료율·정산 방식은 공개 자료로는 확인 불가(회원가입/내부 자료 필요) — 앱을 직접 설치해 체험하거나 리뷰를 더 파는 후속 조사가 필요. 우리 PRD의 "주선자에게는 수수료를 숨기고 신청자만 과금" 방식은 내친소와 다른 지점(내친소는 소개자가 본인이 리워드 받는 걸 인지)일 가능성이 높음 — 이것이 PRD 차별점("지인에게 수수료 숨김")의 실질적 검증 포인트.</p>
+        <p class="source-note">조사 중 확인 못한 것(솔직 표기): ① 내친소의 정확한 요금표·정산 비율 — 원문 기사가 유료 회원가입 벽에 막혀 확인 불가 ② SOLAPI Node.js SDK 코드/가격 — 문서 페이지 접근 제한(팝빌만 Node.js 지원 명확) ③ 각 GitHub 프로젝트의 정확한 라이선스 — LICENSE 파일 직접 열람 안 함, 메인 페이지에 없으면 "명시 안 됨"으로만 표기</p>
+      </article>
+
+      <article class="sub" id="mr-4">
+        <h3>4. 디자인 사례 (국내외 데이팅/매칭 서비스)</h3>
+        <p class="source-note">목표: "편하게 다가올 수 있는" 디자인 — 부담스럽지 않고 친근하되 신뢰감 있는 톤. 현재 화면은 Next.js + Tailwind 기본 스타일.</p>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>서비스</th><th>URL(근거)</th><th>디자인 특징</th><th>참고할 점</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Hinge</strong> (미국, 진지한 만남 지향)</td><td><a href="https://hinge.co/brand-resources">hinge.co/brand-resources</a>, <a href="https://hinge-preview.vercel.app/brand">hinge-preview.vercel.app/brand</a></td><td>핵심 색상은 <span class="swatch" style="background:#FFFEFD"></span><strong>Hinge White(#FFFEFD)</strong>와 <span class="swatch" style="background:#1A1A1A"></span><strong>Hinge Black(#1A1A1A)</strong> 단 2색이 전체의 80%("Core Palette"), 보조색(퍼플 계열 Kohlrabi <span class="swatch" style="background:#994EA8"></span>#994EA8 등)은 20% 이하만 사용. 헤드라인은 세리프체 Tiempos Headline(우아함), 본문은 산세리프 Modern Era(x-height 크고 획대비 낮아 친근). 공식 문구: "a more thoughtful and sophisticated dating app"</td><td>색은 최소화하고 여백·타이포로 신뢰감을 만드는 방식. 우리 서비스도 "진지한 만남" 포지션과 정확히 일치 — 흑백+포인트컬러 1개 구조 참고할만함</td></tr>
+            <tr><td><strong>Coffee Meets Bagel</strong> (미국)</td><td><a href="https://kristinearth.com/coffee-meets-bagel-rebrand">Kristine Arth 리브랜드 포트폴리오</a>, <a href="https://www.behance.net/gallery/74014939/Coffee-Meets-Bagel-Rebrand">Behance 리브랜드</a></td><td>기존의 밝은 블루+오렌지 조합이 "산만하다(distracting)"는 피드백 → <strong>부드러운 퍼플(soft purple)</strong> 톤으로 전면 교체. 로고도 C+B를 하트 모양으로 결합해 "귀여움"과 "성숙함"의 균형. UI는 미니멀·화이트 여백 위주 재정비</td><td>"쨍한 원색 → 부드러운 톤 다운 컬러" 전환 사례. 우리도 원색보다 톤다운된 파스텔/뮤트 컬러가 "편안함" 인상에 유리하다는 근거</td></tr>
+            <tr><td><strong>이음(ium)</strong> (국내, 2010년 시작 국내 최초 소셜 데이팅)</td><td><a href="https://www.ium.co.kr">ium.co.kr</a> (접속 실패), <a href="https://steemit.com/ium/@chocochoco/ium">Steemit 소개글</a></td><td>※ 공식 사이트 접속이 네트워크 오류(ECONNREFUSED)로 실패 — 색상·서체 등 시각 디테일은 <strong>확인하지 못함</strong>. Steemit 글에서 "2010년부터 수천 커플 성공"한 국내 최초 소셜 데이팅 포지셔닝만 확인</td><td>직장인 인증 기반 신뢰 포지셔닝은 우리 서비스(지인 소개 기반 신뢰)와 유사한 축. 디자인 디테일은 재검증 필요 — 앱스토어 스크린샷 직접 확인 권장</td></tr>
+            <tr><td><strong>국내 소개팅 앱 일반 트렌드 (2026)</strong></td><td><a href="https://chinaro.top/?DistributionID=79&amp;JoinID=p_blog">2026 소개팅 어플 순위 TOP5</a> (순위 소개형 블로그, 공식 자료 아님)</td><td>"데일리 대화 미션 기능", "연애 감성을 자극하는 UI"라는 설명만 확인, 구체적 색상·서체 스펙은 근거 문서에 없음</td><td>구체적 디자인 근거 부족 — <strong>추측성 언급 배제</strong>. 필요시 실제 앱스토어 스크린샷을 받아와 별도 확인 필요</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="source-note">중요 확인사항: 국내 앱(이음, 글램 등)은 공식 브랜드/디자인 가이드 문서를 찾지 못했고 공식 사이트 접속도 일부 실패 — 국내 앱 항목은 "포지셔닝"만 근거가 있고, 색상 팔레트(아래 5번)에는 반영하지 않음. 필요하면 앱스토어 스크린샷을 직접 캡처해 재조사 가능.</p>
+      </article>
+
+      <article class="sub" id="mr-5">
+        <h3>5. 색상 팔레트 제안 3세트 ("편안 + 신뢰", 흰 배경 기반)</h3>
+        <p>근거: Hinge의 "흑백 80% + 포인트 20%" 원칙(<a href="https://hinge.co/brand-resources">hinge.co/brand-resources</a>), Coffee Meets Bagel의 "톤다운 퍼플 순화" 사례(<a href="https://kristinearth.com/coffee-meets-bagel-rebrand">kristinearth.com</a>), 색채심리 "calm &amp; trustworthy" 팔레트 자료(<a href="https://www.higocreative.com/blog/calming-color-palettes">higocreative.com</a>, <a href="https://www.figma.com/colors/beige/">Figma Beige 가이드</a>)를 바탕으로 흰 배경(#FFFFFF/#FFFDF9 등) 기반 재구성.</p>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>세트</th><th>주색(Primary)</th><th>보조색(Secondary)</th><th>배경(Background)</th><th>포인트(Accent)</th><th>인상</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>A. 코랄 베이지</strong> <span class="badge badge-ok">추천</span></td>
+              <td><span class="swatch" style="background:#E8846B"></span><code>#E8846B</code><br>톤다운 코랄</td>
+              <td><span class="swatch" style="background:#F2C9B8"></span><code>#F2C9B8</code><br>연코랄</td>
+              <td><span class="swatch" style="background:#FFFDF9"></span><code>#FFFDF9</code><br>아이보리 화이트</td>
+              <td><span class="swatch" style="background:#4A4038"></span><code>#4A4038</code><br>다크 브라운(텍스트용)</td>
+              <td>따뜻하고 사람 냄새 나는 느낌. 틴더의 "빨강"보다 채도 낮춰 부담 없음, 그러면서도 결혼정보회사 특유의 차가운 느낌은 배제</td>
+            </tr>
+            <tr>
+              <td><strong>B. 더스티 로즈 &amp; 세이지</strong></td>
+              <td><span class="swatch" style="background:#C98A93"></span><code>#C98A93</code><br>더스티 로즈</td>
+              <td><span class="swatch" style="background:#A7BFA4"></span><code>#A7BFA4</code><br>세이지 그린</td>
+              <td><span class="swatch" style="background:#FFFFFF"></span><code>#FFFFFF</code></td>
+              <td><span class="swatch" style="background:#5C4B4B"></span><code>#5C4B4B</code><br>딥 모브</td>
+              <td>로즈+그린 조합은 "따뜻함(로즈)"과 "안정감(그린)"을 동시에 전달. 중성적이라 성별 편향 없이 편안함</td>
+            </tr>
+            <tr>
+              <td><strong>C. 뮤트 라벤더</strong> (Hinge식 흑백+포인트 응용)</td>
+              <td><span class="swatch" style="background:#1A1A1A"></span><code>#1A1A1A</code><br>거의 블랙(텍스트/헤더)</td>
+              <td><span class="swatch" style="background:#8E6FA0"></span><code>#8E6FA0</code><br>톤다운 퍼플(Hinge Kohlrabi 참고)</td>
+              <td><span class="swatch" style="background:#FFFEFD"></span><code>#FFFEFD</code></td>
+              <td><span class="swatch" style="background:#F4EFE9"></span><code>#F4EFE9</code><br>연베이지 카드 배경</td>
+              <td>Hinge의 "80% 흑백 + 20% 포인트" 공식 그대로 응용. 가장 "고급스럽고 진지한 만남" 톤에 가까움, 대신 아기자기함은 덜함</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+        <p><strong>추천: A. 코랄 베이지</strong> — 흰 배경 위에서 가장 "편하게 다가오는" 인상이 강하고(따뜻한 코랄), 동시에 채도를 낮춰 가벼워 보이지 않음. 30~40대 사용자에게도 부담 없는 톤(원색 아님).</p>
+      </article>
+
+      <article class="sub" id="mr-6">
+        <h3>6. UI 킷·접근성 (30~40대 배려)</h3>
+        <h4>Tailwind 기반 무료 UI 킷/템플릿</h4>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>용도</th><th>이름</th><th>URL</th><th>라이선스 / 근거</th></tr></thead>
+          <tbody>
+            <tr><td>관리자 대시보드 ①</td><td><strong>TailAdmin (Community Edition)</strong></td><td><a href="https://tailadmin.com/">tailadmin.com</a> / <a href="https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template">GitHub</a></td><td>MIT 라이선스, GitHub 2.2k stars, Tailwind CSS v4 지원, HTML/Next.js/React/Vue/Angular/Laravel 버전, 30+ 대시보드 컴포넌트·50+ UI 요소, 다크모드 지원 — GitHub 저장소 확인</td></tr>
+            <tr><td>관리자 대시보드 ②</td><td><strong>Tailwindadmin (Shadcn UI 기반)</strong></td><td><a href="https://github.com/Tailwind-Admin/free-tailwind-admin-dashboard-template">GitHub</a> / <a href="https://tailwind-admin.com/">tailwind-admin.com</a></td><td>무료·오픈소스, Shadcn UI + Tailwind, React/Next.js/Angular/Vue/Tanstack 지원 — 검색 결과 확인(라이선스는 저장소 README 직접 확인 권장)</td></tr>
+            <tr><td>사용자 화면(랜딩) ①</td><td><strong>Landwind</strong></td><td><a href="https://github.com/themesberg/landwind">GitHub themesberg/landwind</a></td><td>MIT 라이선스, GitHub 1k stars, Flowbite 컴포넌트 기반, 히어로·기능·후기·가격·FAQ·CTA·푸터 섹션 + Figma 파일 제공 — GitHub 저장소 확인</td></tr>
+            <tr><td>사용자 화면(랜딩) ②</td><td><strong>Horizon UI Landing Page Kit</strong></td><td><a href="https://github.com/horizon-ui/free-tailwind-css-landing-kit-page">GitHub horizon-ui</a></td><td>무료, Tailwind CSS + HTML + Figma 랜딩 킷 — 검색 결과(저장소 설명) 확인, 상세 라이선스는 저장소 직접 확인 필요</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="source-note">주의: HyperUI(hyperui.dev)는 접속 시 403 오류로 상세 확인 실패 — 후보에서 제외.</p>
+
+        <h4>접근성·연령대(30~40대) 배려 핵심 가이드</h4>
+        <p class="source-note">근거: <a href="https://a11ykr.github.io/kwcag22/">한국형 웹 콘텐츠 접근성 지침 KWCAG 2.2</a>, <a href="https://scingnews.com/34">고령층 UX 디자인 가이드 - 일상과디자인세상</a></p>
+        <ul>
+          <li><strong>명도 대비(색 대비)</strong>: 텍스트와 배경 대비는 <strong>4.5:1 이상</strong> 필수. 단, 18pt 이상(또는 14pt bold 이상) 큰 텍스트는 3:1까지 허용.</li>
+          <li><strong>기본 글자 크기</strong>: 일반 UI 관행인 12~14px는 40대 이상에게 작게 느껴짐 → <strong>본문 기본 16px 이상</strong> 권장(고령층 UX 가이드 기준).</li>
+          <li><strong>확대 대응</strong>: 텍스트는 브라우저 확대 시 콘텐츠·기능 손실 없이 <strong>최대 200%까지 크기 조정</strong> 가능해야 함(WCAG 기준).</li>
+          <li><strong>시사점</strong>: 위 팔레트 적용 시, 코랄(<span class="swatch" style="background:#E8846B"></span>#E8846B)이나 로즈(<span class="swatch" style="background:#C98A93"></span>#C98A93) 계열을 텍스트 색으로 직접 쓰지 말고 배경/포인트로만 쓰고, 본문 텍스트는 다크 브라운/블랙 계열(<span class="swatch" style="background:#4A4038"></span>#4A4038, <span class="swatch" style="background:#1A1A1A"></span>#1A1A1A 등)로 대비를 확보할 것.</li>
+        </ul>
+        <p class="source-note">조사 중 확인 실패 항목(솔직 기록): ① 이음(ium.co.kr) 공식 사이트 — 접속 오류(ECONNREFUSED) ② 글램 앱 — 공식 디자인 가이드/색상 코드 검색 결과 없음 ③ Mobbin의 Hinge 색상 페이지 — 403 차단(Hinge 공식 브랜드 페이지로 대체 확인) ④ HyperUI — 403 차단, 추천 목록에서 제외.</p>
+      </article>
+    </section>
+
+    <!-- ============ 0-C. 검증·외부자문 (0706) — 신규 ============ -->
+    <section class="cat new-section" id="cat-verify">
+      <h2>🆕 검증·외부자문 (0706)</h2>
+      <div class="source-note">원본: _작업/0706_검증계획.md — 사장님 지시: 자문스킬로 방향 교차확인 + 별도 에이전트로 검증 계획 수립. 원칙: <strong>작성자와 검증자 분리</strong>(만든 에이전트가 스스로 채점 금지), 검증은 사용자가 실제 쓰는 방식 그대로 재현.</div>
+
+      <article class="sub" id="ver-1">
+        <h3>1. 3중 검증 체계</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>층</th><th>누가</th><th>무엇을</th><th>시점</th></tr></thead>
+          <tbody>
+            <tr><td>① 자체 검증</td><td>구현 에이전트 본인</td><td>빌드 통과 + API 흐름 호출</td><td>구현 직후 (필수 조건)</td></tr>
+            <tr><td>② 독립 검증</td><td><strong>별도 검증 에이전트</strong> (구현자와 다른 세션)</td><td>아래 4번 체크리스트를 PRD v3와 1:1 대조, 실제 dev 서버 띄워 재현</td><td>각 구현 단계 완료 시마다</td></tr>
+            <tr><td>③ 외부 AI 교차</td><td>codex(GPT-5.5) → agy(Gemini 3.1 Pro)</td><td>아키텍처·설계 결함 (구현 전 방향 검증)</td><td>단계 착수 전 / 큰 결정 시</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </article>
+
+      <article class="sub" id="ver-2">
+        <h3>2. codex 1차 자문 (완료) — "방향 타당, 단 3가지 지금 잡아라"</h3>
+        <ol>
+          <li><strong>돈 관련 설정값은 사용 시점 snapshot 저장</strong> — 관리자가 나중에 값 바꿔도 진행 중인 건은 불변 → <span class="badge badge-ok">구현 에이전트에 반영 지시함</span></li>
+          <li><strong>잔고 중심이 아닌 원장(ledger, append-only) 중심</strong> — 금액 float 금지, 정수 원 단위 → <span class="badge badge-ok">반영 지시함</span></li>
+          <li><strong>비밀번호 해시는 지인 테스트 단계부터</strong> — 사장님 결정(보안 전부 공란)과 충돌 → <span class="badge badge-warn">사장님 판단 대기</span></li>
+        </ol>
+        <p>기타: SQLite WAL+트랜잭션(반영 지시함), 설정 변경 이력 테이블(반영 지시함), Provider는 설정으로 선택(이미 settings 설계에 부합), 설정 DB화는 운영값만·상태머신은 코드 고정(이미 그렇게 설계됨)</p>
+      </article>
+
+      <article class="sub" id="ver-3">
+        <h3>3. agy 2차 확증 (완료) — "진단 대체로 동의, 일부 과함 + 빠진 위험 있음"</h3>
+        <p><span class="badge badge-ok">동의 (양쪽 일치 → 확정 적용)</span> 설정값 snapshot / 정수 금액 / WAL+트랜잭션 / 비밀번호 해시 권고 / 설정·코드 분리</p>
+        <p><span class="badge badge-accent">MVP엔 과함 (가볍게 타협)</span></p>
+        <ul>
+          <li>전면 audit log → settings_history만 최소로</li>
+          <li>역분개 → 관리자 '조정' 항목 수기 추가 수준</li>
+          <li>완전 append-only 원장 → 현행 잔고+이력 수준 유지 후 확장</li>
+        </ul>
+        <p><span class="badge badge-warn">새 위험 지적 (반영)</span></p>
+        <ol>
+          <li>★서버리스(Vercel류) 배포 시 SQLite 파일 증발 → 외부 배포는 VPS/볼륨 컨테이너 필수 (PRD 배포 장에 경고 추가)</li>
+          <li>dev HMR 시 DB 커넥션 누수 → globalThis 싱글톤 확인 (구현 에이전트에 지시함)</li>
+          <li>백업 전략 부재 → DB 파일 주기 백업 스크립트, server01~03 이전 시 필수 (공란 등록)</li>
+          <li>매 요청 직조회는 트래픽 증가 시 짧은 TTL 캐시 고려 (지금 규모는 문제 없음 — 공란)</li>
+        </ol>
+      </article>
+
+      <article class="sub" id="ver-4">
+        <h3>4. 독립 검증 체크리스트 (검증 에이전트용)</h3>
+        <h4>1단계 — settings 시스템 (구현 중)</h4>
+        <ul>
+          <li>☐ <code>npm run build</code> 통과</li>
+          <li>☐ settings_global/override/history 테이블이 PRD v3 6.2 스키마와 일치</li>
+          <li>☐ <strong>즉시 적용</strong>: 관리자에서 분배율 변경 → 재시작 없이 다음 API 응답에 반영</li>
+          <li>☐ <strong>오버라이드 우선순위</strong>: client &gt; user &gt; global &gt; 코드 기본값 (실제 값 넣어 확인)</li>
+          <li>☐ <strong>snapshot 불변성</strong>: 제안 생성 → 설정 변경 → 기존 제안의 금액·비율은 그대로인지</li>
+          <li>☐ 금액 정수 처리 (float 흔적 없는지 코드 grep + 계산 결과 확인)</li>
+          <li>☐ WAL 모드·busy_timeout 적용 (PRAGMA 확인)</li>
+          <li>☐ <code>/api/version</code> 동작 + 로그인 시 안내</li>
+          <li>☐ 서비스명 <code>ui.service_name</code> 변경 → 화면 제목 즉시 변경</li>
+          <li>☐ <strong>수수료 숨김</strong>: 신청자·지인 노출 화면 응답에 수수료·분배 필드 없음 (전 화면)</li>
+          <li>☐ settings 변경 시 history 기록 (누가·언제·무엇을)</li>
+          <li>☐ git 커밋 존재 + 커밋 전후 diff가 보고 내용과 일치</li>
+        </ul>
+        <h4>2단계 — 주선비 2종 원장 / 예치금 A·B / 성사기준 모드 (다음)</h4>
+        <ul>
+          <li>☐ 기본 주선비·성공 사례비 분리 원장 기록 (append-only)</li>
+          <li>☐ 예치금 모드 B 전환 시 신규 신청 흐름 변화 + 진행 중 건은 A 유지</li>
+          <li>☐ 성사기준 선택형: 신청자가 3/5/7회 선택 → 판정 로직 반영</li>
+          <li>☐ 몰수·환불이 원장 합계와 일치 (잔고 = 원장 합)</li>
+        </ul>
+        <h4>3단계 — 요청형 게시판 / 우수 주선자 / 개인정보 분리 (그 다음)</h4>
+        <ul>
+          <li>☐ (단계 착수 시 상세화)</li>
+        </ul>
+        <h4>검증 실패 시 규칙</h4>
+        <ul>
+          <li>검증 에이전트는 <strong>고치지 말고 보고만</strong> → 메인이 원인 파악 후 구현 에이전트에 수정 지시 (증상 덮기 금지, 근본원인 규명)</li>
+          <li>같은 항목 2회 실패 시 외부 AI 자문 (cli자문 스킬)</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="ver-5">
+        <h3>5. 사장님 판단 대기</h3>
+        <div class="todo-box">
+          <h4>결정 필요 (1건)</h4>
+          <ul>
+            <li><strong>비밀번호 해시를 지금 넣을지</strong> — codex 강한 권고 vs 사장님 "보안 전부 공란" 결정. (작업량: 소 — bcrypt 적용 반나절 이내)</li>
+          </ul>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ 1. 자료 인벤토리 ============ -->
+    <section class="cat" id="cat-inventory">
+      <h2>자료 인벤토리 · 중복 정리</h2>
+      <div class="source-note">원본: 0706_00_자료인벤토리_중복정리.md</div>
+
+      <article class="sub" id="inv-1">
+        <h3>1. 원자료 목록 (자료실/)</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>자료</th><th>정체</th><th>상태</th></tr></thead>
+          <tbody>
+            <tr><td>소개팅.mht (4.94MB)</td><td>OneNote "소개팅" 페이지 저장본 (2026-04-13 작성분 위주, 04-19 저장)</td><td>텍스트 전문 추출 완료 → <code>_작업/0706_mht원문_소개팅.md</code> (약 9.6만 자) + 이미지 7장 (<code>_작업/mht_images/</code>)</td></tr>
+            <tr><td>데이팅 서비스 페인 포인트 분석 - Google Gemini.url</td><td>Gemini 대화 링크 (f6818a28a882c239)</td><td>로그인 필요. 단, 해당 대화의 산출물(시장조사 초안·문제사례)이 mht 안에 이미 포함돼 있음</td></tr>
+            <tr><td>test0709-소개팅-제미나이_prd_1.url</td><td>GitHub kwang-gi/test0709 저장소 링크</td><td>클론 완료 → <code>_작업/repo_test0709/</code></td></tr>
+            <tr><td>동영상/ (신규)</td><td>유튜브 3개 다운로드 (소넷 에이전트, 2026-07-06)</td><td>mp4 3개 + 한국어 자막 srt 완비</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </article>
+
+      <article class="sub" id="inv-2">
+        <h3>2. mht 내부 구성 (OneNote 섹션 순서)</h3>
+        <ol>
+          <li><strong>Gemini와의 대화 전문</strong> (2026-04-13, "prd 만들기" Gem) — Linker 기획 대화 처음~끝 ("수고했어 들어가서 좀 쉬어라"까지)</li>
+          <li><strong>코드팩토리 유튜브 요약</strong> (Lilys AI) — 왕초보 클로드 코드 튜토리얼: "요약"·"기본"·"길게" 3벌</li>
+          <li><strong>시장조사 초안</strong> — 데이팅 서비스 페인포인트 분석 리포트 + 유사 서비스 문제점 + 운영자 관점 리스크</li>
+          <li><strong>문제사례/본인인증 메모</strong> — 사용자 자필 메모 (등기 인증, 즉시 몰수, 빨간색 경고 등)</li>
+          <li><strong>로맨스 스캠 정리</strong> — MBC 히든아이 영상 Lilys 요약 2벌 + 체크리스트 + 심리분석 (일부 중복 재붙여넣기)</li>
+          <li><strong>레딧 글 번역</strong> — 데이팅 앱에 지친 31세 남성의 실제 후기 (r/dating)</li>
+        </ol>
+      </article>
+
+      <article class="sub" id="inv-3">
+        <h3>3. GitHub repo_test0709 구성</h3>
+        <ul>
+          <li><code>소개팅/제미나이_prd_1/</code> — <strong>Linker 문서 19개</strong> (00~18)</li>
+          <li><code>lilys-pattern-skill/</code> — 유튜브 스크립트 → 릴리스AI 스타일 요약 4종+확장 리포트 생성 스킬 (SKILL.md, run.py, 템플릿 12종, index.html)</li>
+          <li><code>유튜브 분석 전문가 지침.txt</code> (13.8KB)</li>
+          <li><code>lilys-pattern-skill/대화내용/대화내용.md</code> — 릴리스AI 패턴 조사 대화 요약</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="inv-4">
+        <h3>4. ★ 중복 제거 판정 (readme 지시: "대화내용 중복 제거 후 분석")</h3>
+        <p><span class="badge badge-ok">정본으로 쓸 것 (5 + 1)</span></p>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>정본</th><th>이유</th></tr></thead>
+          <tbody>
+            <tr><td>mht 대화 전문 (추출본)</td><td>가장 원본. 사용자 발언 원문 전체</td></tr>
+            <tr><td>01_PRD (v1.6)</td><td>기능 요구사항 최종본</td></tr>
+            <tr><td>02_페인포인트_분석</td><td>시장조사 정본</td></tr>
+            <tr><td>03_시스템_아키텍처_및_화면설계</td><td>기술스택·화면 정본</td></tr>
+            <tr><td>05_코드_보안_및_관리_가이드 (v1.1)</td><td>보안·소스관리 정본</td></tr>
+            <tr><td><strong>18_대표_지시사항_집대성</strong></td><td>★ 사용자 지시 원문만 모은 최종본 — 실질적 "사업 성경"</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p><span class="badge badge-warn">중복 (참고용 보관, 분석 대상 제외)</span></p>
+        <ul>
+          <li><strong>00_채팅내용_전체 1~3</strong> = mht 대화 전문의 압축본 (동일 대화)</li>
+          <li><strong>04, 06~17 (14개)</strong> = 같은 내용의 "책 한 권 분량" 요구 반복 과정에서 생성된 버전업 반복물 (v2.8 → v3.5 → v5.0 → v6.0 → v7.0 → v12 → v13 → v20 → v100 ×2). 내용 골자는 01+02+03+05+18과 동일, 표현만 확장</li>
+          <li>mht 내 Lilys 요약 3벌(튜토리얼)·로맨스스캠 요약 중복분 → 각 1벌만 정리에 반영</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="inv-5">
+        <h3>5. 다운로드된 동영상 (자료실/동영상/)</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>영상</th><th>파일</th><th>크기</th><th>자막</th></tr></thead>
+          <tbody>
+            <tr><td>[글로벌K] 일본, 소개팅 앱 '바가지' 피해 속출 / KBS 2024.12.03 (zD43nYcv72s)</td><td>mp4</td><td>2.36MB</td><td>ko 3종</td></tr>
+            <tr><td>왕초보 클로드 코드 튜토리얼! (코드팩토리) (aw5jHq9rgHI)</td><td>mp4</td><td>50.8MB</td><td>ko 2종</td></tr>
+            <tr><td>[스페셜기획] 로맨스 스캠 완벽정리 (MBC every1 히든아이 EP.14) (82MLyxWN1yU)</td><td>mp4</td><td>30.0MB</td><td>ko 2종</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="source-note">참고: en 자막은 유튜브 429 오류로 제외(ko만 확보). 3번 파일명의 ".zip"은 실제 유튜브 제목 텍스트임 (압축파일 아님, 정상 mp4).</p>
+      </article>
+    </section>
+
+    <!-- ============ 2. Linker 사업 기획 ============ -->
+    <section class="cat" id="cat-biz">
+      <h2>Linker 사업 기획 핵심</h2>
+      <div class="source-note">출처: 소개팅.mht 내 Gemini 대화 전문 (2026-04-13) + repo 18_대표_지시사항_집대성.md, 01_PRD(v1.6)</div>
+
+      <article class="sub" id="biz-1">
+        <h3>1. 서비스 컨셉</h3>
+        <ul>
+          <li><strong>지인 소개 기반 리워드 매칭 웹 플랫폼</strong> (가칭: Linker)</li>
+          <li>누구나 자기 주위의 지인을 소개팅 희망자에게 소개 → 주선자(리셀러)로 등록, 성사 시 수수료 수익</li>
+          <li><strong>커플 성사 기준: 첫 소개일로부터 3번 만나면 성사 간주</strong> (기준은 5회·7회·여행 등으로 프리미엄 세팅 가능)</li>
+          <li>웹(반응형) 우선. 웹스토어 미등록 — 홈페이지에서 텔레그램처럼 직접 다운로드하는 설치형 클라이언트(Tauri) 병행</li>
+          <li>결혼정보회사가 아님: 기본 만남 코스(차·식사)까지만 제공, 애프터는 당사자 몫</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="biz-2">
+        <h3>2. 요금·정산 구조</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>항목</th><th>금액(단위: 상대값)</th><th>비고</th></tr></thead>
+          <tbody>
+            <tr><td>최초 결제</td><td>예치금 5 + 1회차 주선비 1 = <strong>6 선입금</strong></td><td>"진정성 예치금" — 가벼운 유저 차단</td></tr>
+            <tr><td>소개마다</td><td>주선비 1~4 선불</td><td>본인 희망 조건에 따라</td></tr>
+            <tr><td>성사 시</td><td>잔금 5 추가 → <strong>총 성사비 10</strong></td><td>에스크로 흐름</td></tr>
+            <tr><td>실패 시</td><td>주선자 몫(1) 제외 환불</td><td>매칭 전 = 즉시 환불, 매칭 후 = 유예+주선자 확인 후</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <ul>
+          <li>성사 수수료 실제 구상: <strong>70만~120만 원 (하이엔드/프라이빗 헤드헌팅급)</strong> → "지인 허들" 해소 장치</li>
+          <li>수익 배분: 주선비·성사비 모두 플랫폼-주선자 사전 약정 비율로 분배</li>
+          <li><strong>현금(가상계좌) 결제 위주</strong>, 카드 최소화. 환불은 입금한 본인 명의 계좌로만 (자금세탁 방지)</li>
+          <li>정산: 건별 아님 — <strong>최소 금액(예: 10만 원) 이상 또는 일정 주기 묶음 정산</strong></li>
+          <li>1회차 만남 주선비는 <strong>환불 규정 없음 명시</strong> ("마음에 안 듦"은 환불 사유 아님)</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="biz-3">
+        <h3>3. 성비 불균형 대응 룰</h3>
+        <ul>
+          <li>남초 시장(8:2) 전제</li>
+          <li><strong>남자는 여자만 소개 가능</strong> (남자가 남자 소개 금지)</li>
+          <li><strong>여자는 남자·여자 모두 소개 가능</strong></li>
+          <li>인기남 예외 규칙: 남성 소개도 수수료 수취 가능 (객관 지표 필요 — 전문직 자격증, 원천징수 등). 단, 성사되면 일정 기간 재소개 불가(쿨타임)라 자연 소멸</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="biz-4">
+        <h3>4. 신원 인증 — 등기 우편 인증 (PAV)</h3>
+        <ul>
+          <li>여성: 문자 인증 / <strong>남성·주선자: 등기 인증</strong> — 실시간 이름 확인 후 실거주지로 등기 발송, 등기 안의 안내대로 입력해야 가입 승인</li>
+          <li>개인정보 최소 수집: 몇 년생·사는 곳·직업 정도의 불특정 정보만, 상세 신상 불요</li>
+          <li>효과: ① 주선자 안심 보장("플랫폼이 그 사람 집 주소를 안다") ② 가해 의도자에게 심리적 압박 ③ 장난성 가입 99% 차단</li>
+          <li>지인 프로필 등록 시 <strong>본인 동의 알림톡 필수</strong> (무단 등록 방지, 초상권/개인정보법 대응)</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="biz-5">
+        <h3>5. 무관용 원칙 (예치금 100% 즉시 몰수 — 4대 조항)</h3>
+        <p>한 마디라도 나오면 몰수, 변명 불가:</p>
+        <ol>
+          <li><strong>데이트 폭력·언어 폭력</strong> (욕설, 위협, 모멸)</li>
+          <li><strong>사이비 종교·포교</strong> (심리 공부 빙자 포함)</li>
+          <li><strong>사업·동업 제안</strong></li>
+          <li><strong>돈 얘기</strong> (대출, 코인, 주식, 투자 권유)</li>
+        </ol>
+        <ul>
+          <li><strong>주선자 연대 책임</strong>: 가해자를 데려온 주선자의 예치금·수익금도 통째 몰수</li>
+          <li><strong>즉시 가동 시스템</strong>: 피해 발생 → 피해자 즉시 환불 + 전체 공지(경각심)</li>
+          <li>데이트 규약: 남성 — 비싼 술집 유인(바가지) 금지 / 여성 — 쇼핑 결제 전가 금지 / 첫 만남 비용 상한선 플랫폼이 제시</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="biz-6">
+        <h3>6. 어뷰징 방어 로직 (5대 시나리오 대응)</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>시나리오</th><th>대응</th></tr></thead>
+          <tbody>
+            <tr><td>주선자-당사자 뒷거래 (수수료 회피 담합)</td><td>성사율 모니터링 알고리즘 (소개 많은데 성사 0% → 의심·패널티). 단, 수수료가 합리적이고 실패 신고 시 계속 다른 소개가 들어와 실제 커플에겐 오히려 귀찮음 → 자연 심리 방어막</td></tr>
+            <tr><td>매력 지인 알바 (1회차 주선비 헌터)</td><td>소개받는 지인 단위 횟수 제한 (예: 동일 인물 월 3회)</td></tr>
+            <tr><td>무단 프로필 등록 + 고의 파투</td><td>동의 알림톡 필수</td></tr>
+            <tr><td>자금세탁 (입금 후 전액 환불 반복)</td><td>본인 명의 계좌 환불 원칙 + 이상 거래 탐지</td></tr>
+            <tr><td>별점 테러 (경쟁사·악성 유저)</td><td>연속 최하점 부여자 Black/Red 분류, 평점 즉시 반영 아닌 '보류' 후 관리자 검토</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </article>
+
+      <article class="sub" id="biz-7">
+        <h3>7. 문화·에티켓 시스템</h3>
+        <ul>
+          <li><strong>김비서 독설 애니메이션</strong>: 긴 약관 대신 만남 확정 직전 팝업 멘트. "여기 전지현/아이유 안 나온다. 눈높이 바닥에 처박고 나와라" / "박보검 찾으려면 연예기획사 가라" — 불순 의도자만 뜨끔할 멘트 포함</li>
+          <li><strong>이별 에티켓 프로토콜</strong>: 마음에 안 들어도 집 앞 배웅 + 정중한 거절 메시지 ("오늘 반가웠고, 제 스타일은 아니지만 좋은 사람 만나세요"). 잠수·읽씹 금지. 정중 거절 툴 제공, 매너를 등급·정산율에 연동</li>
+          <li>핵심 가치: <strong>"상대도 미용실 가고 시간 내서 나왔다 — 주선자 얼굴 봐서라도 최소한의 예의"</strong></li>
+          <li><strong>투명 경영 선언</strong>: 시스템 오류·한계 숨기지 않고 공개, 지적 환영, 함께 고침</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="biz-8">
+        <h3>8. 운영·마케팅 전략</h3>
+        <ul>
+          <li><strong>소수 정예 주선자 핀셋 모집</strong> (린 스타트업) — 전국 확장 불필요, 몇 명의 주선자 + 그 주변 지인이면 충분. 반응 보며 점진 확대</li>
+          <li>마케팅 피치: "돈 벌 사람 손? → 주위 적적한 사람 애인 만들어 주면 돼. 다단계 아님" / "아는 사람 없는데요? → 집으로 가세요"</li>
+          <li>사용자·주선자 <strong>등급제</strong> (우수 주선자 수수료 우대, 사고 주선자 도태), 관리자 대시보드(등급 조정·강제 집행)</li>
+          <li>법적 대비: 중개업 사업자 등록. 세무 문제는 확장 시점에 처리</li>
+          <li>사용자 본인이 마케팅 경력 김 → 초기 유저 확보 자신 있음</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="biz-9">
+        <h3>9. 미결/추후 논의</h3>
+        <div class="todo-box">
+          <h4>스펙 대화로 확정 필요</h4>
+          <ul>
+            <li>웹 vs 앱 역할 분담 (readme: 웹 = 사용설명·편의·앱 다운로드·버전관리 / <strong>앱 부분은 readme 미완성</strong>) — <span class="badge badge-ok">0706 PRD v3에서 "웹 우선, 앱은 자리만"으로 확정</span></li>
+            <li>인기남 판별 객관 지표 확정</li>
+            <li>콜루전(거짓 3회 인증)은 "돈 내는 사람이 본인"이라 실익 없음 — 방어 로직 우선순위 낮음으로 정리됨</li>
+          </ul>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ 3. 시장조사 ============ -->
+    <section class="cat" id="cat-market">
+      <h2>시장조사 · 페인포인트</h2>
+      <div class="source-note">출처: 소개팅.mht 내 "시장조사 초안"·"문제사례" 섹션 (Gemini 검색 기반, 2026-04-13) + repo 02_페인포인트_분석.md + 로맨스 스캠 Lilys 요약 + KBS 뉴스 + 레딧 글</div>
+
+      <article class="sub" id="mkt-1">
+        <h3>1. 소개팅 앱(데이팅 앱) 페인포인트</h3>
+        <ul>
+          <li><strong>극심한 성비 불균형</strong>: 남녀 8:2~9:1. 여성은 '좋아요' 폭탄 피로(여왕벌 현상), 남성은 돈 써도 매칭 안 되는 박탈감. 여성에게만 무료 재화 주는 성차별 정책 반발</li>
+          <li><strong>결과 보장 없는 과금</strong>: 프로필 열람·호감·채팅방 개설 등 단계마다 결제. 읽씹/안읽씹이어도 환불 불가</li>
+          <li><strong>가짜 계정(알바)·유령 회원</strong>: 운영사 테크랩스가 타인 사진 도용 <strong>가짜 여성 계정 약 270개</strong> 직접 운영, 남성 결제 유도 → <strong>피해 남성 2,200여 명, 약 23억 원</strong></li>
+          <li><strong>낮은 유지율</strong>: 30일 리텐션 <strong>2%</strong> 수준 → 신규 유입 마케팅비 부담. 틴더·범블 성장 정체, 앱 피로도 최고조</li>
+          <li><strong>범죄 노출</strong>: 로맨스 스캠(평균 8일 내 금전 갈취), 사이비 포교, 기혼자 위장, 신원 검증 부실</li>
+          <li><strong>보안 사고</strong>: 여성 전용 앱 'Tea' — 신분증 셀카 포함 이미지 <strong>7만 2천 장 유출</strong></li>
+        </ul>
+      </article>
+
+      <article class="sub" id="mkt-2">
+        <h3>2. 결혼정보회사(결정사) 페인포인트</h3>
+        <ul>
+          <li><strong>미끼 매물·의무 방어전</strong>: 가입 전 고스펙 프로필로 유인 → 가입 후 횟수 차감용 억지 매칭</li>
+          <li><strong>고액 선불 + 환불 거부</strong>: 수백만~수천만 원 선불. 1년간 1회도 주선 안 하고 "계약기간 경과" 환불 거부. 공정위 규정 회피용 <strong>'기본 횟수/서비스 횟수' 쪼개기 계약서</strong></li>
+          <li><strong>비인간적 등급제</strong>: 스펙으로 사람 재단 → 자존감 상처. 서류 스펙은 봐도 매너·인성은 미검증</li>
+          <li><strong>매니저 실적 압박·가스라이팅</strong>: 안 맞는 상대 강요, 실패 시 회원 탓</li>
+          <li><strong>혼탁한 업계</strong>: '업계 1위' 문구 두고 업체 간 소송·가처분 반복</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="mkt-3">
+        <h3>3. 프리미엄·인증 기반 서비스의 함정</h3>
+        <ul>
+          <li><strong>골드스푼</strong>: 해킹으로 회원 <strong>14만 명 경제력 인증자료 유출</strong> + 가상화폐 <strong>25억 협박</strong></li>
+          <li><strong>전과 10범 사기꾼</strong>이 자산가 위장 가입 → 운영자 '인증 책임' 리스크</li>
+          <li><strong>소울매처</strong>(월 1명 엄선 구독): 만족도 높지만 유저 6~7%만 결제 가능 → 확장 한계</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="mkt-4">
+        <h3>4. 로맨스 스캠 (MBC 히든아이 EP.14 정리)</h3>
+        <p><strong>3단계 수법</strong></p>
+        <ol>
+          <li><strong>약점 파악</strong> — SNS로 외로움·상황 사전 조사</li>
+          <li><strong>신뢰 형성</strong> — 약 2주(길게는 2~7년), 호감 표현+선물 공세 ("공사 사이즈 재기")</li>
+          <li><strong>투자 권유·편취</strong> — 수술비·상속세·로비자금 등 긴급 상황 연출 → 잠적</li>
+        </ol>
+        <p><strong>특징</strong></p>
+        <ul>
+          <li>전문직 사칭 (의사·파일럿·갤러리 관장) + 유니폼·제복으로 신뢰 연출</li>
+          <li>동시다발 문어발 사기 (한 명이 5명 동시 진행), 다른 피해자 돈으로 돌려막기</li>
+          <li>남녀노소 무차별 — 82세 할머니 15억 피해 사례</li>
+          <li><strong>피해액 급증: 2024년 2~6월에만 450억+ (직전 5년 합계 138억의 3배)</strong></li>
+        </ul>
+        <p><strong>대표 사례</strong></p>
+        <ul>
+          <li>갤러리 관장 사칭 여성: 대기업 50대 남성에게 2년간 11억 편취 (퇴직금 3.8억 포함) → 피해자 극단 선택</li>
+          <li>파일럿 사칭 남성: 피해자 4명 약 5억, 징역 5년 + 민사 배상</li>
+        </ul>
+        <p><strong>대처</strong></p>
+        <p>즉시 은행 지급정지 신청 (골든타임) + 경찰청 사이버범죄 신고시스템(ECRM) 신고 + 증거 보존</p>
+      </article>
+
+      <article class="sub" id="mkt-5">
+        <h3>5. 일본 소개팅 앱 '바가지 술집' 피해 (KBS 글로벌K, 2024.12.03)</h3>
+        <ul>
+          <li>소개팅 앱에서 만난 상대가 특정 술집으로 유인 → 바가지 요금. 외부 업체와 결탁한 조직적 사기</li>
+          <li>Linker 시사점: 등기 인증 + 지인 보증으로 외부 결탁 사기 원천 차단 논리의 근거 영상</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="mkt-6">
+        <h3>6. 실사용자 목소리 (레딧 r/dating, 31세 남성)</h3>
+        <ul>
+          <li>10년 앱 사용 → "같은 사람만 계속 보임, 매치 안 됨"</li>
+          <li><strong>선택지 과잉 → 사람들이 너무 쉽게 포기</strong> / 오히려 더 외로워짐</li>
+          <li>앱 끊고 오프라인(볼링 리그, 카페)으로 전환 결심 → 진지한 관계 갈망 확인</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="mkt-7">
+        <h3>7. 종합 — 소비자 핵심 니즈 4가지 (Linker가 공략할 지점)</h3>
+        <ol>
+          <li><strong>"돈 냈으면 확실하게 만나게 해달라"</strong> → 결과(성사) 기반 과금·에스크로</li>
+          <li><strong>"알바·유령 말고 신원 확실한 사람"</strong> → 지인 소개 + 등기 인증</li>
+          <li><strong>"수백만 원 선불은 부담, 가벼운 앱은 싫다"</strong> → 합리적 예치금 구조</li>
+          <li><strong>"서류 등급 말고 실제 괜찮은 사람(매너)"</strong> → 지인 보증 + 매너 등급제</li>
+        </ol>
+        <p>2026 트렌드: 유저들은 알고리즘 추천 불신, <strong>'친구·지인의 영향력'을 가장 신뢰</strong> → Linker 방향성과 일치</p>
+      </article>
+    </section>
+
+    <!-- ============ 4. 보안·아키텍처 ============ -->
+    <section class="cat" id="cat-security">
+      <h2>보안 · 아키텍처 설계</h2>
+      <div class="source-note">출처: 소개팅.mht 내 Gemini 대화 (보안 파트) + repo 03_시스템_아키텍처, 05_코드_보안_가이드(v1.1), 14_철통_보안_시방서</div>
+
+      <article class="sub" id="sec-1">
+        <h3>1. 설계 철학 (대표 요구사항 원문 기반)</h3>
+        <blockquote>"서버가 털리거나 제재가 들어와도 내용을 오픈하고 싶지 않다"</blockquote>
+        <blockquote>"신분 노출 꺼리는 사람들(VIP)은 PC에 별도 설치해서 쓸 수 있게"</blockquote>
+        <blockquote>"메인 서버 문제 생기면 문어발 자르듯 즉시 버리고 다른 서버로"</blockquote>
+        <blockquote>"개발자 백도어까지 차단하고 싶다"</blockquote>
+      </article>
+
+      <article class="sub" id="sec-2">
+        <h3>2. 핵심 아키텍처 — "은폐와 분리"</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>구성요소</th><th>역할</th></tr></thead>
+          <tbody>
+            <tr><td><strong>빈 대문 서버 (Gateway/Proxy)</strong></td><td>유저 최초 접점. DB 없음, 안내만. 털려도 얻을 것 0. 이상 징후 시 즉시 삭제(꼬리 자르기)</td></tr>
+            <tr><td><strong>유령 DB (Ghost DB)</strong></td><td>비공개망(VPC) 내부, 인터넷 주소 없음. 대문 서버의 암호화 신호에만 반응</td></tr>
+            <tr><td><strong>그림자 감시/백업 서버</strong></td><td>정산·블랙리스트 관리용 최소 데이터만 별도 보관. 서버 이동 시에도 블랙 정보 유지</td></tr>
+            <tr><td><strong>다중 페일오버</strong></td><td>예비 대문 서버 다수 준비 → 1번 공격 시 폐쇄, 2번 가동. 클라이언트에 "1번 안 되면 2번" 로직 내장</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </article>
+
+      <article class="sub" id="sec-3">
+        <h3>3. 설치형 클라이언트 (Tauri)</h3>
+        <ul>
+          <li>일렉트론보다 가벼운 Tauri로 PC 설치형 배포 (홈페이지 직접 다운로드, 웹스토어 미등록)</li>
+          <li><strong>민감 데이터(사진·상세 프로필·채팅)는 유저 기기에만 저장</strong> — 제로 트러스트 + 종단 간 암호화(E2EE)</li>
+          <li>서버에는 해시(암호화 쓰레기 데이터)만 → 압수수색·해킹에도 매칭 이력 추적 불가 (텔레그램 방식)</li>
+          <li>VIP 셀링 포인트: "서버가 털려도 누구랑 만났는지 알 수 없다"</li>
+          <li>해커가 정상 유저로 잠입해도 <strong>본인에게 허용된 데이터 이상 절대 접근 불가</strong> (은행 비유: 도둑이 계좌 만들어도 남의 금고 못 봄)</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="sec-4">
+        <h3>4. 데이터·통신 보안</h3>
+        <ul>
+          <li>서버↔DB 통신: <strong>mTLS</strong> (디지털 인증서 상호 확인)</li>
+          <li>저장 데이터: <strong>AES-256 필드 단위 암호화</strong>, 마스터 키는 <strong>HSM/대표 개인 기기</strong>에만</li>
+          <li><strong>불변 인프라(Immutable Infrastructure)</strong>: 개발자가 서버 직접 수정 불가, 배포는 자동 보안 스캔 + 대표 승인 잠금</li>
+          <li><strong>불변 감사 로그(Audit Trail)</strong>: 정산 버튼 누른 기록 수정 불가 — 흔적 지우기 원천 차단</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="sec-5">
+        <h3>5. 정산·금융 보안</h3>
+        <ul>
+          <li><strong>결제와 신원의 분리</strong>: 정산 서버에는 익명 ID(User_AX78)만 — 누구 돈인지 연결고리는 별도 금고 서버</li>
+          <li><strong>웹훅 무결성 검증</strong>: 결제사(토스 등) 입금 신호의 디지털 서명 100% 검증 → 가짜 입금 신호 차단</li>
+          <li>환불은 입금 본인 명의 계좌로만 (자금세탁 방지)</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="sec-6">
+        <h3>6. 소스 코드·DB 관리 (대표 개인 보안 습관 반영)</h3>
+        <ul>
+          <li>대표 방식: <strong>VeraCrypt 암호화 가상 드라이브</strong> + 제3의 비활성 계정 클라우드 보관 (= 콜드 스토리지, 전문가 수준 평가)</li>
+          <li>실무 표준: DB는 시간/일 단위 <strong>자동 암호화 백업</strong> → 별도 서버 적재. 개발자는 조회만 가능, 백업 반출은 대표 계정만</li>
+          <li>AI 협업 시: .env / .gitignore 분리 설정을 AI에게 먼저 요청하는 습관</li>
+          <li>개발 인력 권한 분리: 코드 작성자와 DB/백업 관리자 분리 (한 명이 모든 열쇠 금지)</li>
+          <li>주기적 복구 테스트 ("한 달 전 데이터로 복구해봐")</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="sec-7">
+        <h3>7. 기술 스택 (03 문서 + 개발 방침)</h3>
+        <ul>
+          <li>웹 기반 반응형(모바일/PC) MVP 우선 — Next.js + Node.js 계열 (Gemini 추천)</li>
+          <li>개발 주체: <strong>대표가 AI 3종(클로드 코드 + Codex/GPT + Gemini) 조합으로 직접 개발</strong> 예정</li>
+          <li>Tauri는 초기 MVP엔 불필요 — 사업 커지고 VIP 수요 생기면 웹사이트 포장용으로 도입</li>
+        </ul>
+      </article>
+    </section>
+
+    <!-- ============ 5. 개발 참고자료 ============ -->
+    <section class="cat" id="cat-dev">
+      <h2>개발 참고자료</h2>
+      <div class="source-note">출처: 코드팩토리 유튜브(왕초보 클로드 코드 튜토리얼, aw5jHq9rgHI)의 Lilys 요약 3벌(중복 제거) + repo lilys-pattern-skill + 유튜브 분석 전문가 지침.txt</div>
+
+      <article class="sub" id="dev-1">
+        <h3>1. 코드팩토리 튜토리얼 핵심 (클로드 코드로 소개팅 앱 만들기)</h3>
+        <p><strong>설치·모드</strong></p>
+        <ul>
+          <li>설치: curl 명령어 터미널 설치 권장, <code>claude</code> 로 실행 (+ dangerously-skip-permissions 플래그)</li>
+          <li><strong>Shift+Tab 4모드</strong>: 기본(매번 허가) / Accept Edits(파일 수정 자유) / <strong>Plan(작업 전 계획, 시작은 항상 이걸로 권장)</strong> / Bypass Permissions(전권)</li>
+          <li>사고 수준 옵션: low/medium/high/<strong>max</strong> — max로 오래·깊게 생각 유도</li>
+        </ul>
+        <p><strong>추천 기술 스택 (초보 기준)</strong></p>
+        <ul>
+          <li>프론트: <strong>React Native</strong> (디버깅 자동화에 유리)</li>
+          <li>백엔드/DB: <strong>Supabase</strong> (서버리스 API 자체 제공, Free 플랜, 서울 리전) — 숙련자는 Convex</li>
+          <li>실시간 채팅: WebSocket</li>
+          <li>인프라 비용 월 100만 원 넘기 전까진 Supabase로 충분</li>
+        </ul>
+        <p><strong>MCP 자동화 워크플로우</strong></p>
+        <ol>
+          <li>Supabase 프로젝트 생성 (수동) → DB 스키마 적용은 MCP로 자동</li>
+          <li>MCP 등록 후 클로드 코드 재시작 (<code>claude -c</code> 로 대화 복구), <code>/mcp</code> 로 확인·인증</li>
+          <li>수동 작업: 스토리지 버킷 <code>profile-photos</code> 생성(Public) + <strong>RLS 정책 4개</strong> (authenticated_upload=INSERT / public_read=SELECT / owner_delete=DELETE / owner_update=UPDATE) + 이메일 확인 토글 Off(테스트용)</li>
+          <li>디버깅 자동화: Expo 토큰 발급 → 디버깅 MCP 등록 → "MCP로 전부 검증하고 될 때까지 반복 개선, 수동 작업은 인스트럭션 달라" 루프</li>
+        </ol>
+        <p>교훈: <strong>AI가 직접 디버깅할 수 있는 프레임워크 선택이 절대적으로 유리</strong></p>
+        <p><strong>프롬프팅 팁</strong></p>
+        <ul>
+          <li>Typeless(음성→정리된 프롬프트, 한국어→영어 자동 번역) — 영어 프롬프트가 토큰 절약</li>
+          <li>요구사항은 번호 매겨 구조화하면 응답 품질 상승</li>
+          <li>모르면 사람 대신 AI에게 스텝바이스텝으로 물어보는 습관</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="dev-2">
+        <h3>2. lilys-pattern-skill (repo 내 보유 스킬)</h3>
+        <ul>
+          <li>기능: 유튜브 스크립트(자막) 입력 → <strong>릴리스AI 스타일 요약 4종(짧게/기본/길게/쉽게) + 확장 리포트(액션아이템·배경지식·반대시각·인포그래픽·퀴즈·플래시카드·커스텀) + 추천질문 3개</strong></li>
+          <li>구성: SKILL.md + run.py + 템플릿 12종 + index.html</li>
+          <li>활용처: 이번에 받은 동영상 3개의 자막(srt 확보됨)을 이 스킬 패턴으로 정리 가능</li>
+        </ul>
+      </article>
+
+      <article class="sub" id="dev-3">
+        <h3>3. 유튜브 분석 전문가 지침.txt (13.8KB)</h3>
+        <p>유튜브 영상 분석용 전문가 지침 문서 (상세 내용은 필요 시 추가 분석)</p>
+      </article>
+
+      <article class="sub" id="dev-4">
+        <h3>4. readme.md의 웹앱 방향 (이번 프로젝트)</h3>
+        <ul>
+          <li><strong>웹</strong>: 사용 설명, 편의 제공, 앱 다운로드, 버전 관리</li>
+          <li><strong>앱</strong>: readme 미완성 — 0706 PRD v3에서 "웹 우선, 앱은 자리만(다운로드·버전체크 구조만 설계)"으로 확정</li>
+          <li>이번 3일 프로젝트 목표: 흩어진 기존 작업물(위 자료들)을 통합해 하나의 시스템으로</li>
+        </ul>
+      </article>
+    </section>
+
+    <hr>
+    <p style="color:var(--text-sub); font-size:12.5px; text-align:center; margin-top:30px;">
+      만남(소개팅) 프로젝트 설명서 v4 · 2026-07-06 13:53 갱신 — 이름 변경: 자료정리→설명서 (v3: 12:52, v2: 12:40, v1: 오전) · 원본 md 5개 + PRD v3 + 실사 + 시장조사 + 검증계획 통합본
+    </p>
+
+  </main>
+</div>
+
+<script>
+  function toggleCat(el) {
+    var cat = el.parentElement;
+    cat.classList.toggle('open');
+  }
+  // active link highlight on scroll (best-effort, no external libs)
+  document.addEventListener('DOMContentLoaded', function () {
+    var links = document.querySelectorAll('.navlink');
+    links.forEach(function (link) {
+      link.addEventListener('click', function () {
+        links.forEach(function (l) { l.classList.remove('active'); });
+        link.classList.add('active');
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
