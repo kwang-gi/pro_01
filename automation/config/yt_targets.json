@@ -1,16 +1,42 @@
 {
-  "_설명": "영상 스크립트 수집 대상. queries는 유튜브 검색어(각 per_query개), channels는 채널 영상목록 URL(각 per_channel개). 목표 누적 300개. 수집 기록은 data/scripts/index.csv 에 쌓이고 같은 영상은 다시 받지 않는다.",
-  "per_query": 5,
+  "_설명": "영상 스크립트 수집 대상. queries는 유튜브 검색어(각 per_query개), channels는 채널 영상목록 URL(각 per_channel개). 목표 누적 300개. 수집 기록은 data/scripts/index.csv 에 쌓이고 같은 영상은 다시 받지 않는다. player_clients는 유튜브가 봇으로 막을 때 차례로 바꿔 시도할 접속 방식(빈 값=기본).",
+  "per_query": 10,
   "per_channel": 5,
   "max_new_per_run": 30,
-  "langs": ["ko", "en"],
+  "langs": [
+    "ko",
+    "en"
+  ],
   "queries": [
     "Claude Code 활용",
+    "Claude Code 사용법",
     "Claude Code subagents workflow",
+    "Claude Code hooks skills tutorial",
+    "Claude Code MCP setup",
+    "Anthropic Claude new features",
+    "Claude API prompt caching",
+    "Claude agent SDK tutorial",
     "n8n AI agent automation tutorial",
+    "n8n 자동화 실무",
+    "n8n workflow tutorial beginner",
     "MCP server tutorial",
-    "prompt caching cost",
-    "AI 업무 자동화 사례"
+    "AI 업무 자동화 사례",
+    "AI 에이전트 만들기",
+    "prompt engineering advanced techniques",
+    "LLM cost optimization caching",
+    "local LLM Qwen small model",
+    "Ollama local model tutorial",
+    "Obsidian AI workflow",
+    "AI coding agent workflow 2026"
   ],
-  "channels": []
+  "channels": [],
+  "player_clients": [
+    "",
+    "tv_embedded",
+    "web_embedded",
+    "mweb",
+    "web_safari",
+    "android_vr",
+    "ios"
+  ]
 }
