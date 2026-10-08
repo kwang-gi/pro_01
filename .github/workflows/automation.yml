@@ -2,6 +2,8 @@
 # 1) 뉴스 레이더: 매일 06:20 KST, 모델 호출 없음
 # 2) 영상 스크립트 수집: 월·목 06:35 KST, 모델 호출 없음
 # 3) 하이쿠 가공: 2) 직후, ANTHROPIC_API_KEY 시크릿이 있을 때만
+# 4) 현황판·옵시디언 내보내기·노션 동기화: 뉴스 직후 매일(모델 호출 없음)
+# 5) 멈춤 알림: 4) 직후, 디스코드 주소/이슈 알림(이메일·앱) — 정상이면 조용히 끝
 # PR에서는 저장 없이 "돌아가는지"만 검증하고 결과를 아티팩트로 남긴다.
 name: automation
 
@@ -17,6 +19,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: automation-${{ github.ref }}
@@ -87,4 +90,49 @@ jobs:
           git config user.email "automation-bot@users.noreply.github.com"
           git add data/scripts data/notes 2>/dev/null || true
           git diff --cached --quiet || git commit -m "스크립트 수집·가공 $(TZ=Asia/Seoul date +%F)"
+          git pull --rebase && git push
+
+  report:
+    needs: [news]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: 최신 상태로 맞추기 (뉴스 커밋 반영)
+        if: github.event_name != 'pull_request'
+        run: git pull --rebase
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 현황판 만들기
+        run: python automation/scripts/dashboard.py
+      - name: 옵시디언 폴더 만들기
+        run: python automation/scripts/export_obsidian.py
+      - name: 노션 동기화 (키 있을 때만)
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_PARENT_PAGE_ID: ${{ secrets.NOTION_PARENT_PAGE_ID }}
+        run: python automation/scripts/notion_sync.py ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}
+      - name: 멈춤 알림
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python automation/scripts/notify.py ${{ github.event_name == 'pull_request' && '--dry-run' || '' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: report
+          path: |
+            data/현황판.html
+            data/status.json
+          if-no-files-found: ignore
+      - name: 결과 저장(커밋)
+        if: github.event_name != 'pull_request'
+        run: |
+          git config user.name "automation-bot"
+          git config user.email "automation-bot@users.noreply.github.com"
+          git add data/status.json data/현황판.html data/obsidian data/notion_synced.json 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "현황판·옵시디언 $(TZ=Asia/Seoul date +%F)"
           git pull --rebase && git push
