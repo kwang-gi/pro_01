@@ -133,6 +133,9 @@ jobs:
         run: |
           git config user.name "automation-bot"
           git config user.email "automation-bot@users.noreply.github.com"
-          git add data/status.json data/현황판.html data/obsidian data/notion_synced.json 2>/dev/null || true
+          # 없는 파일이 하나라도 섞이면 git add 전체가 실패하므로 있는 것만 담는다
+          for p in data/status.json data/현황판.html data/obsidian data/notion_synced.json; do
+            if [ -e "$p" ]; then git add "$p"; fi
+          done
           git diff --cached --quiet || git commit -m "현황판·옵시디언 $(TZ=Asia/Seoul date +%F)"
           git pull --rebase && git push
