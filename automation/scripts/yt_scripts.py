@@ -121,15 +121,19 @@ def main() -> int:
             print("  ! " + er)
         return 0 if candidates or not errors else 1
 
-    added = 0
+    added = tried = 0
     for src, e in candidates:
-        if added >= limit:
+        if added >= limit or tried >= limit * 2:  # 실패가 이어져도 한도의 2배까지만 시도
             break
+        tried += 1
         vid = e["id"]
         try:
             info, lang, text = fetch_transcript(vid, cfg.get("langs", ["ko", "en"]))
         except Exception as ex:
             errors.append(f"자막 실패 [{vid}]: {ex}")
+            if "not a bot" in str(ex):  # 유튜브가 이 IP를 막음 → 더 시도해도 같은 결과
+                errors.append("유튜브가 이 실행 환경(IP)을 봇으로 막음 — PC에서 실행하세요")
+                break
             continue
         if not text:
             errors.append(f"자막 없음 [{vid}] {e.get('title')}")

@@ -25,7 +25,7 @@ RUBRIC = ROOT / "automation" / "jev" / "스크립트분석_기준서.md"
 MODEL = "claude-haiku-5-5"
 # 달러 / 100만 토큰 (100K 이하 프롬프트 기준). 캐시 쓰기 1.25배, 읽기 0.1배.
 PRICE = {"in": 0.10, "out": 0.50, "cache_write": 0.125, "cache_read": 0.01}
-REQUIRED = ["제목", "한줄요약", "분류", "핵심기술", "활용사례", "따라하기절차", "실패조건", "우리적용", "신뢰도", "판정"]
+REQUIRED = ["제목", "한줄요약", "분류", "활용가치", "핵심기술", "활용사례", "따라하기절차", "실패조건", "우리적용", "신뢰도", "판정"]
 KST = dt.timezone(dt.timedelta(hours=9))
 
 
@@ -77,7 +77,7 @@ def work(client, rubric: str, path: Path) -> dict:
 
 
 def to_markdown(vid: str, src: str, d: dict, errs: list[str]) -> str:
-    lines = ["---", f"source: {vid}", f"type: note", f"분류: {d.get('분류', '')}", f"판정: {d.get('판정', '')}",
+    lines = ["---", f"source: {vid}", f"type: note", f"분류: {d.get('분류', '')}", f"판정: {d.get('판정', '')}", f"활용가치: {d.get('활용가치', '')}",
              f"jev: {'통과' if not errs else '실패 ' + '; '.join(errs)}", "tags: [노트, 하이쿠가공]", "---",
              f"# {d.get('제목', vid)}", "", f"> {d.get('한줄요약', '')}", "", f"원본: [[{src}]]", "",
              "## 핵심 기술", *[f"- {t}" for t in d.get("핵심기술", [])], "", "## 활용 사례"]
