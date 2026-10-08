@@ -1,5 +1,5 @@
 # 지식센터 자동화 — 무료(GitHub Actions)로 매일 도는 수집 파이프라인
-# 1) 뉴스 레이더: 매일 06:20 KST, 모델 호출 없음
+# 1) 뉴스 레이더: 매일 06:20 KST(07:47 예비), 모델 호출 없음
 # 2) 영상 스크립트 수집: 월·목 06:35 KST, 모델 호출 없음
 # 3) 하이쿠 가공: 2) 직후, ANTHROPIC_API_KEY 시크릿이 있을 때만
 # 4) 현황판·옵시디언 내보내기·노션 동기화: 뉴스 직후 매일(모델 호출 없음)
@@ -10,6 +10,7 @@ name: automation
 on:
   schedule:
     - cron: "20 21 * * *"    # 매일 06:20 KST
+    - cron: "47 22 * * *"    # 07:47 KST 예비(06:20 누락 대비, 같은 날 재실행 안전)
     - cron: "35 21 * * 0,3"  # 월·목 06:35 KST
   workflow_dispatch:
   pull_request:
@@ -27,7 +28,7 @@ concurrency:
 
 jobs:
   news:
-    if: github.event_name != 'schedule' || github.event.schedule == '20 21 * * *'
+    if: github.event_name != 'schedule' || (github.event.schedule == '20 21 * * *' || github.event.schedule == '47 22 * * *')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
