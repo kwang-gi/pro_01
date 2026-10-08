@@ -115,6 +115,22 @@ def matches(item: dict, keywords: list[str]) -> bool:
     return any(k.lower() in blob for k in keywords)
 
 
+def read_day_sections(path: Path) -> list[tuple[str, list[str]]]:
+    """같은 날 이미 만든 파일의 소스별 항목 줄을 읽는다(하루에 여러 번 돌아도 앞서 모은 것을 지우지 않도록)."""
+    if not path.exists():
+        return []
+    secs, cur = [], None
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("## "):
+            name = line[3:].strip()
+            cur = None if name == "수집 상태" else (name, [])
+            if cur:
+                secs.append(cur)
+        elif cur and line.startswith("- ["):
+            cur[1].append(line)
+    return secs
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(ROOT / "data" / "news"))
@@ -150,7 +166,18 @@ def main() -> int:
         if fresh:
             sections.append((src["name"], fresh))
 
-    total = sum(len(f) for _, f in sections)
+    day_file = out / f"{args.date}.md"
+    merged = read_day_sections(day_file)
+    for name, items in sections:
+        new_lines = [f"- [{it['title'] or it['url']}]({it['url']})" + (f" — {it['summary']}" if it["summary"] else "") for it in items]
+        for mname, mlines in merged:
+            if mname == name:
+                mlines.extend(new_lines)
+                break
+        else:
+            merged.append((name, new_lines))
+    new_total = sum(len(f) for _, f in sections)
+    total = sum(len(l) for _, l in merged)
     lines = [
         "---",
         f"date: {args.date}",
@@ -163,18 +190,16 @@ def main() -> int:
         "> 모델 없이 스크립트가 모은 원자료입니다. 요약·판단은 아침 루틴(Claude)이 이 파일만 읽어서 합니다.",
         "",
     ]
-    for name, items in sections:
+    for name, item_lines in merged:
         lines.append(f"## {name}")
-        for it in items:
-            lines.append(f"- [{it['title'] or it['url']}]({it['url']})" + (f" — {it['summary']}" if it["summary"] else ""))
+        lines.extend(item_lines)
         lines.append("")
     lines += ["## 수집 상태", "| 소스 | 결과 | 내용 |", "|---|---|---|", *status, ""]
 
-    day_file = out / f"{args.date}.md"
     day_file.write_text("\n".join(lines), encoding="utf-8")
     seen_path.write_text(json.dumps(sorted(seen), ensure_ascii=False, indent=0), encoding="utf-8")
     ok = sum(1 for s in status if "| 성공 |" in s)
-    print(f"[news_radar] {day_file} 저장 — 새 소식 {total}건, 소스 {ok}/{len(status)} 성공")
+    print(f"[news_radar] {day_file} 저장 — 새 소식 {new_total}건(오늘 누적 {total}건), 소스 {ok}/{len(status)} 성공")
     return 0 if ok else 1
 
 
