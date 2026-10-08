@@ -1,0 +1,17 @@
+{
+  "_설명": "뉴스 레이더 수집처. type: rss(RSS/Atom), html_links(페이지 안 링크 추출), changelog_md(깃허브 CHANGELOG 최신 섹션), hn(해커뉴스 검색 API). 추가/삭제는 이 파일만 고치면 된다.",
+  "keywords": ["claude", "anthropic", "mcp", "agent", "에이전트", "n8n", "automation", "자동화", "haiku", "sonnet", "opus", "prompt caching", "llm", "ollama", "gemma", "qwen", "workflow"],
+  "sources": [
+    {"name": "Anthropic News", "type": "html_links", "url": "https://www.anthropic.com/news", "base": "https://www.anthropic.com", "pattern": "href=\"(/news/[a-z0-9\\-]+)\"", "always": true},
+    {"name": "Anthropic Engineering", "type": "html_links", "url": "https://www.anthropic.com/engineering", "base": "https://www.anthropic.com", "pattern": "href=\"(/engineering/[a-z0-9\\-]+)\"", "always": true},
+    {"name": "Claude Code CHANGELOG", "type": "changelog_md", "url": "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md", "always": true},
+    {"name": "n8n Releases", "type": "rss", "url": "https://github.com/n8n-io/n8n/releases.atom", "always": true},
+    {"name": "n8n Blog", "type": "rss", "url": "https://blog.n8n.io/rss/"},
+    {"name": "Hacker News (claude OR anthropic)", "type": "hn", "url": "https://hn.algolia.com/api/v1/search_by_date?tags=story&query=claude&numericFilters=points>30"},
+    {"name": "Hacker News (n8n)", "type": "hn", "url": "https://hn.algolia.com/api/v1/search_by_date?tags=story&query=n8n&numericFilters=points>10"},
+    {"name": "Simon Willison", "type": "rss", "url": "https://simonwillison.net/atom/everything/"},
+    {"name": "Hugging Face Blog", "type": "rss", "url": "https://huggingface.co/blog/feed.xml"},
+    {"name": "GeekNews", "type": "rss", "url": "https://news.hada.io/rss/news"},
+    {"name": "Reddit r/ClaudeAI", "type": "rss", "url": "https://www.reddit.com/r/ClaudeAI/top/.rss?t=day"}
+  ]
+}

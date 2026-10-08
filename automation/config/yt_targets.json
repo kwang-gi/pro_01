@@ -1,0 +1,16 @@
+{
+  "_설명": "영상 스크립트 수집 대상. queries는 유튜브 검색어(각 per_query개), channels는 채널 영상목록 URL(각 per_channel개). 목표 누적 300개. 수집 기록은 data/scripts/index.csv 에 쌓이고 같은 영상은 다시 받지 않는다.",
+  "per_query": 5,
+  "per_channel": 5,
+  "max_new_per_run": 30,
+  "langs": ["ko", "en"],
+  "queries": [
+    "Claude Code 활용",
+    "Claude Code subagents workflow",
+    "n8n AI agent automation tutorial",
+    "MCP server tutorial",
+    "prompt caching cost",
+    "AI 업무 자동화 사례"
+  ],
+  "channels": []
+}
