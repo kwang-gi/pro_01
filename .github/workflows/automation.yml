@@ -1,0 +1,90 @@
+# 지식센터 자동화 — 무료(GitHub Actions)로 매일 도는 수집 파이프라인
+# 1) 뉴스 레이더: 매일 06:20 KST, 모델 호출 없음
+# 2) 영상 스크립트 수집: 월·목 06:35 KST, 모델 호출 없음
+# 3) 하이쿠 가공: 2) 직후, ANTHROPIC_API_KEY 시크릿이 있을 때만
+# PR에서는 저장 없이 "돌아가는지"만 검증하고 결과를 아티팩트로 남긴다.
+name: automation
+
+on:
+  schedule:
+    - cron: "20 21 * * *"    # 매일 06:20 KST
+    - cron: "35 21 * * 0,3"  # 월·목 06:35 KST
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "automation/**"
+      - ".github/workflows/automation.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: automation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  news:
+    if: github.event_name != 'schedule' || github.event.schedule == '20 21 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 뉴스 레이더 실행
+        run: python automation/scripts/news_radar.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: news
+          path: data/news/
+      - name: 결과 저장(커밋)
+        if: github.event_name != 'pull_request'
+        run: |
+          git config user.name "automation-bot"
+          git config user.email "automation-bot@users.noreply.github.com"
+          git add data/news
+          git diff --cached --quiet || git commit -m "뉴스 레이더 $(TZ=Asia/Seoul date +%F)"
+          git pull --rebase && git push
+
+  scripts:
+    if: github.event_name != 'schedule' || github.event.schedule == '35 21 * * 0,3'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q yt-dlp anthropic
+      - name: 영상 스크립트 수집
+        # 유튜브가 클라우드 IP를 막으면 실패할 수 있다 → 다음 단계는 계속 진행
+        continue-on-error: true
+        run: python automation/scripts/yt_scripts.py ${{ github.event_name == 'pull_request' && '--limit 2' || '' }}
+      - name: jev 채점 자가시험
+        run: python automation/scripts/haiku_fanout.py --selftest
+      - name: 하이쿠 가공 (키 있을 때만)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$ANTHROPIC_API_KEY" ]; then
+            python automation/scripts/haiku_fanout.py --limit 30
+          else
+            python automation/scripts/haiku_fanout.py --dry-run
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scripts
+          path: |
+            data/scripts/
+            data/notes/
+          if-no-files-found: ignore
+      - name: 결과 저장(커밋)
+        if: github.event_name != 'pull_request'
+        run: |
+          git config user.name "automation-bot"
+          git config user.email "automation-bot@users.noreply.github.com"
+          git add data/scripts data/notes 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "스크립트 수집·가공 $(TZ=Asia/Seoul date +%F)"
+          git pull --rebase && git push
