@@ -61,6 +61,8 @@ jobs:
         # 유튜브가 클라우드 IP를 막으면 실패할 수 있다 → 다음 단계는 계속 진행
         continue-on-error: true
         run: python automation/scripts/yt_scripts.py ${{ github.event_name == 'pull_request' && '--limit 2' || '' }}
+      - name: jev 채점 자가시험
+        run: python automation/scripts/haiku_fanout.py --selftest
       - name: 하이쿠 가공 (키 있을 때만)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
