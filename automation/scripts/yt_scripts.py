@@ -65,10 +65,12 @@ def vtt_to_text(vtt: str) -> str:
     return "".join(out).strip()
 
 
-def fetch_transcript(video_id: str, langs: list[str]) -> tuple[dict, str, str]:
+def fetch_transcript(video_id: str, langs: list[str], client: str = "") -> tuple[dict, str, str]:
+    """client: yt-dlp 유튜브 접속 방식(player_client). 빈 값이면 기본 방식."""
     url = f"https://www.youtube.com/watch?v={video_id}"
+    extra = ["--extractor-args", f"youtube:player_client={client}"] if client else []
     with tempfile.TemporaryDirectory() as tmp:
-        r = ytdlp("--skip-download", "--write-subs", "--write-auto-subs", "--sub-langs", ",".join(langs),
+        r = ytdlp(*extra, "--skip-download", "--write-subs", "--write-auto-subs", "--sub-langs", ",".join(langs),
                   "--sub-format", "vtt", "--write-info-json", "-o", f"{tmp}/%(id)s.%(ext)s", url)
         info_p = Path(tmp) / f"{video_id}.info.json"
         if not info_p.exists():
@@ -121,19 +123,30 @@ def main() -> int:
             print("  ! " + er)
         return 0 if candidates or not errors else 1
 
+    # 유튜브가 봇으로 막으면 다른 접속 방식(player_client)으로 바꿔 다시 시도한다
+    clients = cfg.get("player_clients") or [""]
+    ci = 0
     added = tried = 0
     for src, e in candidates:
         if added >= limit or tried >= limit * 2:  # 실패가 이어져도 한도의 2배까지만 시도
             break
         tried += 1
         vid = e["id"]
-        try:
-            info, lang, text = fetch_transcript(vid, cfg.get("langs", ["ko", "en"]))
-        except Exception as ex:
-            errors.append(f"자막 실패 [{vid}]: {ex}")
-            if "not a bot" in str(ex):  # 유튜브가 이 IP를 막음 → 더 시도해도 같은 결과
-                errors.append("유튜브가 이 실행 환경(IP)을 봇으로 막음 — PC에서 실행하세요")
+        info = text = None
+        while ci < len(clients):
+            try:
+                info, lang, text = fetch_transcript(vid, cfg.get("langs", ["ko", "en"]), clients[ci])
                 break
+            except Exception as ex:
+                if "not a bot" not in str(ex):
+                    errors.append(f"자막 실패 [{vid}]: {ex}")
+                    break
+                errors.append(f"봇 차단 [{clients[ci] or '기본'}] → 다음 접속 방식")
+                ci += 1
+        if ci >= len(clients):  # 모든 방식이 막힘 → 더 시도해도 같은 결과
+            errors.append("유튜브가 이 실행 환경(IP)을 봇으로 막음 — PC에서 실행하세요")
+            break
+        if info is None:
             continue
         if not text:
             errors.append(f"자막 없음 [{vid}] {e.get('title')}")
@@ -151,7 +164,7 @@ def main() -> int:
             + "tags: [스크립트, 자동수집]\n---\n" + f"# {row['title']}\n\n{text}\n", encoding="utf-8")
         index[vid] = row
         added += 1
-        print(f"  + {vid} ({lang}, {len(text)}자) {row['title'][:60]}")
+        print(f"  + {vid} ({lang}, {len(text)}자, 방식 {clients[ci] or '기본'}) {row['title'][:60]}")
 
     with index_path.open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=FIELDS)
