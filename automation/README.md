@@ -27,3 +27,17 @@ pip install anthropic && set ANTHROPIC_API_KEY=... && python automation/scripts/
 2. 뉴스: `data/news/날짜.md` 맨 아래 "수집 상태" 표에서 소스별 성공/실패 확인.
 3. 스크립트: 실행 로그의 `새로 저장 N개, 누적 M개 / 목표 300`.
 4. 가공: `data/notes/_run_*.json` 의 `passed`(jev 통과 수), `cost_usd`, `cache_read_input_tokens`(0이면 캐싱 안 된 것).
+
+## 구독(무료)으로 하이쿠 돌리기
+API 키 없이 Max 구독만으로 Claude Code 안에서 하이쿠 분업을 돌리는 경로다. 서브에이전트 두 개와 루틴 두 개로 구성된다.
+
+| 구성 | 파일 | 역할 |
+|---|---|---|
+| 서브에이전트 | `.claude/agents/jev-script-analyst.md` | haiku. 시스템 프롬프트 = jev 기준서 전문(고정 prefix). 스크립트 1개 → `data/notes/<id>.md` |
+| 서브에이전트 | `.claude/agents/news-brief.md` | haiku. 레이더 원본 → `data/news/날짜.brief.md` (핵심 3줄·주제별·정할 일) |
+| 루틴 | `routines/process-scripts.md` | 노트 없는 스크립트 최대 30개를 병렬 가공 → 기계 검사 → 실패분 1회 재시도 → 초안 PR |
+| 루틴 | `routines/morning-news.md` | 오늘 브리프 생성 → `/mnt/project-files/news/`에 복사 → 핵심 3줄 답장 |
+
+- 루틴 파일의 내용을 예약 Claude 루틴의 프롬프트로 그대로 붙여 넣는다.
+- 기준서(`jev/스크립트분석_기준서.md`)를 고치면 `jev-script-analyst.md` 안의 사본도 같이 고쳐야 한다.
+- `scripts/haiku_fanout.py` 는 그대로 남는다. API 키가 있을 때 쓰는 경로이고, 위 방식은 구독 한도 안에서 돈다.
