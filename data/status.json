@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-10-09 01:40",
+  "timezone": "KST",
+  "today": "2026-10-09",
+  "stale": false,
+  "problems": [],
+  "news": {
+    "files": 1,
+    "latest_date": "2026-10-09",
+    "items": 14,
+    "sources_ok": 11,
+    "sources_total": 11,
+    "recent_dates": [
+      "2026-10-09"
+    ],
+    "days_old": 0
+  },
+  "scripts": {
+    "count": 0,
+    "goal": 300
+  },
+  "notes": {
+    "count": 0,
+    "jev_pass": 0,
+    "high_value": 0
+  }
+}
