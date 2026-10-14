@@ -1,16 +1,17 @@
 {
-  "generated_at": "2026-10-14 10:24",
+  "generated_at": "2026-10-15 06:52",
   "timezone": "KST",
-  "today": "2026-10-14",
+  "today": "2026-10-15",
   "stale": false,
   "problems": [],
   "news": {
-    "files": 6,
-    "latest_date": "2026-10-14",
-    "items": 62,
+    "files": 7,
+    "latest_date": "2026-10-15",
+    "items": 20,
     "sources_ok": 11,
     "sources_total": 11,
     "recent_dates": [
+      "2026-10-15",
       "2026-10-14",
       "2026-10-13",
       "2026-10-12",
