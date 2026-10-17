@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-17 08:39",
+  "generated_at": "2026-10-17 09:47",
   "timezone": "KST",
   "today": "2026-10-17",
   "stale": false,
@@ -7,7 +7,7 @@
   "news": {
     "files": 9,
     "latest_date": "2026-10-17",
-    "items": 32,
+    "items": 40,
     "sources_ok": 11,
     "sources_total": 11,
     "recent_dates": [
