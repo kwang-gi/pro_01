@@ -1,23 +1,23 @@
 {
-  "generated_at": "2026-11-04 11:43",
+  "generated_at": "2026-11-05 10:29",
   "timezone": "KST",
-  "today": "2026-11-04",
+  "today": "2026-11-05",
   "stale": false,
   "problems": [],
   "news": {
-    "files": 27,
-    "latest_date": "2026-11-04",
-    "items": 27,
+    "files": 28,
+    "latest_date": "2026-11-05",
+    "items": 26,
     "sources_ok": 11,
     "sources_total": 11,
     "recent_dates": [
+      "2026-11-05",
       "2026-11-04",
       "2026-11-03",
       "2026-11-02",
       "2026-11-01",
       "2026-10-31",
-      "2026-10-30",
-      "2026-10-29"
+      "2026-10-30"
     ],
     "days_old": 0
   },
